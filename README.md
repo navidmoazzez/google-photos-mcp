@@ -1,6 +1,4 @@
-<div align="center">
-  <img src="https://cdn.navid.media/connectors/google-photos-icon.png" alt="Google Photos" width="88">
-</div>
+<img src="https://cdn.navid.media/connectors/google-photos-icon.png" alt="Google Photos" width="88">
 
 # Google Photos MCP
 
