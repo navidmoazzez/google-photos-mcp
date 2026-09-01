@@ -35,7 +35,7 @@ Options:
   GOOGLE_PHOTOS_HTTP_PORT / _HOST / _TOKEN  for --http
 
 Setting up the Google Cloud project takes about ten minutes and is the only
-fiddly part. The walkthrough is in references/setup.md.
+fiddly part. The walkthrough is in the README, section 3.
 
 https://github.com/navidmoazzez/google-photos-mcp
 `;
@@ -44,7 +44,7 @@ async function runAuth(): Promise<number> {
   const config = loadConfig();
   if (!config.clientId || !config.clientSecret) {
     process.stderr.write(
-      `Set GOOGLE_PHOTOS_CLIENT_ID and GOOGLE_PHOTOS_CLIENT_SECRET first. Both come from your own Google Cloud project; references/setup.md walks through creating one.\n`,
+      `Set GOOGLE_PHOTOS_CLIENT_ID and GOOGLE_PHOTOS_CLIENT_SECRET first. Both come from your own Google Cloud project; the README section 3 walks through creating one.\n`,
     );
     return 1;
   }

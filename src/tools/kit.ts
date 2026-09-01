@@ -48,7 +48,7 @@ export function fail(error: unknown): ToolResult {
 export const confirmArg = {
   confirm: z
     .boolean()
-    .optional()
+    .default(false)
     .describe(
       "Must be true for this to run. The effect cannot be undone through the API, so it is refused without an explicit confirmation.",
     ),

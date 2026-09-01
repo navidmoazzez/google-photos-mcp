@@ -25,6 +25,6 @@ Built. Add this to your MCP client config:
   }
 }
 
-No credentials yet? See references/setup.md, then run:
+No credentials yet? See the README setup section, then run:
   node $(pwd)/dist/index.js auth
 JSON

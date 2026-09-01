@@ -131,7 +131,9 @@ share. Every read is filtered to what this app created.
   app-owned copy the other tools can reach. This does leave two copies
 - \`base_url\` expires in ~60 minutes and needs a size suffix (\`=d\`, \`=w2048-h2048\`,
   \`=dv\` for video). It is not a shareable link
-- Quota is 10,000 requests per project per day, resetting at midnight Pacific`,
+- Quota is two separate daily budgets per Google Cloud project, both resetting at midnight
+  UTC: 10,000 API requests, and 75,000 media-byte requests. Fetching a photo's bytes spends
+  the second, not the first`,
       },
     ],
   }));

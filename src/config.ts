@@ -14,8 +14,8 @@
  *   GOOGLE_PHOTOS_CLIENT_SECRET
  *   GOOGLE_PHOTOS_REFRESH_TOKEN
  *
- * `google-photos-mcp auth` produces the third one. See references/setup.md for
- * where the first two come from.
+ * `google-photos-mcp auth` produces the third one. See the README, section 3,
+ * for where the first two come from.
  */
 
 export type Config = {

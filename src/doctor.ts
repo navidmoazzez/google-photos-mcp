@@ -25,7 +25,7 @@ export async function runDoctor(): Promise<number> {
     bad(`Missing: ${missingCredentials(config).join(", ")}`);
     info("");
     info("GOOGLE_PHOTOS_CLIENT_ID and GOOGLE_PHOTOS_CLIENT_SECRET come from a Google");
-    info("Cloud project you create. references/setup.md walks through it.");
+    info("Cloud project you create. The README covers it step by step.");
     info("GOOGLE_PHOTOS_REFRESH_TOKEN comes from `google-photos-mcp auth`.");
     return 1;
   }

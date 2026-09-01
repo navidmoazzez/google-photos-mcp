@@ -87,7 +87,7 @@ no environment values from anywhere else.
 
 ## Setup docs are facts
 
-Every button name and menu path in `references/setup.md` came from Google's live
+Every button name and menu path in the README setup section came from Google's live
 documentation. Console labels get rewritten often. If you cannot verify a label,
 describe the goal instead of naming the control: a wrong button name is worse
 than none, because the reader cannot tell it is wrong until it fails.

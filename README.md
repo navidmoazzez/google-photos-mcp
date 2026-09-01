@@ -1,4 +1,14 @@
+<div align="center">
+  <img src="https://cdn.navid.media/connectors/google-photos-icon.png" alt="Google Photos" width="88">
+</div>
+
 # Google Photos MCP
+
+[![Stars](https://img.shields.io/github/stars/navidmoazzez/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/navidmoazzez/google-photos-mcp)
+[![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/navidmoazzez/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/navidmoazzez/google-photos-mcp/actions)
+[![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
+[![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 
 Let an AI agent work with your Google Photos: pick photos from your library, upload new ones, and build albums.
 
@@ -20,43 +30,19 @@ Built by [Navid Moazzez](https://navid.me).
 
 ## Contents
 
-1. [What makes this different](#what-makes-this-different)
-2. [What you can ask it](#1-what-you-can-ask-it)
-3. [Install](#2-install)
-4. [Connect your account](#3-connect-your-account)
-5. [Tools](#4-tools)
-6. [Writing safely](#5-writing-safely)
-7. [What the API can and cannot do](#6-what-the-api-can-and-cannot-do)
-8. [Your data](#7-your-data)
-9. [Troubleshooting](#8-troubleshooting)
-10. [Run it from source](#9-run-it-from-source)
+| | Section | |
+|---|---|---|
+| 1 | [What you can ask it](#1-what-you-can-ask-it-) | Real prompts, not features |
+| 2 | [Quick install](#2-quick-install-) | No account needed |
+| 3 | [Setup](#3-setup-) | Every click, start to finish |
+| 4 | [Connect your client](#4-connect-your-client-) | Nine clients, copy and paste |
+| 5 | [Check it worked](#5-check-it-worked-) | One command |
+| 6 | [Tools](#6-tools-) | All 28 |
+| 7 | [Notes and gotchas](#7-notes-and-gotchas-) | What the API will not do |
+| 8 | [Troubleshooting](#8-troubleshooting-) | Symptom to cause |
+| | [FAQ](#faq-) | |
 
-## What makes this different
-
-On **1 April 2025** Google removed whole-library read access from the Photos API
-for every third-party app. The `photoslibrary`, `photoslibrary.readonly` and
-`photoslibrary.sharing` scopes are gone, with no replacement outside Google's
-partner programme.
-
-This matters more than it sounds. Any tool that offers to search your entire
-Google Photos library is either running on a grandfathered grant, or quietly
-searching only the handful of photos it uploaded itself and reporting that as
-your library.
-
-This server is built around what actually remains, and says so in its own tool
-descriptions:
-
-**The Picker API** reaches your whole library, through you. It hands you a
-Google-hosted URL, you choose what the agent may see, and it sees exactly that.
-
-**The Library API** reaches only media this server uploaded. Albums, uploads,
-descriptions, sharing, all of it scoped to its own data.
-
-An empty result from a listing tool therefore means "nothing uploaded yet", not
-"you have no photos", and the server is careful to tell the model that so it
-does not draw the wrong conclusion out loud.
-
-## 1. What you can ask it
+## 1. What you can ask it 💬
 
 > Let me pick some photos and tell me what I chose.
 
@@ -76,68 +62,220 @@ does not draw the wrong conclusion out loud.
 
 > Add a caption between the second and third photo in that album.
 
-The one to notice is the last: album enrichments. A caption, a place, or a map
-between two points, sitting inline between photos. It is what turns an album
-into something that reads like a story, and almost nothing else drives it.
+> How much of today's API quota have we used?
 
-## 2. Install
+The one to notice is the caption. Album enrichments put a text note, a place, or
+a map between two points inline between photos. It is what turns an album into
+something that reads like a story, and almost nothing else drives it.
+
+## 2. Quick install ⚡
 
 Node 20 or newer. Nothing else.
 
-> Not released to npm yet, so the `npx` commands below will not resolve until
-> `v1.0.0` is tagged. Until then, [run it from source](#9-run-it-from-source) and
-> replace `"command": "npx"` and its `args` with
-> `"command": "node", "args": ["/full/path/to/google-photos-mcp/dist/index.js"]`.
-> Everything else on this page is the same.
+> [!NOTE]
+> Not published to npm yet, so the `npx` commands on this page will not resolve
+> until the first release is tagged. Everything else here is accurate.
 
-You need three credentials before any of this works. [Section 3](#3-connect-your-account) covers getting them.
+```bash
+npx -y @thenavidm/google-photos-mcp --version
+```
+
+That is the whole install. `npx` fetches it on demand, so there is nothing to
+update later.
+
+Installing the package needs no account. Only the config in
+[section 4](#4-connect-your-client-) does.
+
+## 3. Setup 🔑
+
+Google Photos has no API keys, and Google does not support service accounts for
+these APIs at all. The only way in is an OAuth client that you create, in a
+Google Cloud project that you own, authorised by the account whose photos you
+want to reach.
+
+About ten minutes, once. It is free and you will not be asked for a card.
+
+### Before you start
+
+| You need | Check with | If missing |
+|---|---|---|
+| Node 20 or newer | `node -v` | [nodejs.org](https://nodejs.org) |
+| A Google account | You have one | Any account works, personal or Workspace |
+
+It has to be the account that owns the photos, or one you are willing to sign in as.
+
+### Have an agent do it
+
+The agent cannot sign in to Google for you. Only you can create the credential.
+What it can do is walk you through it, wire up the config, and verify the
+connection.
+
+Paste this into Claude Code, Cursor, or any agent with terminal access:
+
+```
+Help me set up the Google Photos MCP server.
+
+1. Open https://console.cloud.google.com/projectcreate and tell me what to name a project.
+2. Walk me through enabling the Photos Picker API and the Photos Library API. Both.
+3. Walk me through the Google Auth Platform consent screen, adding me as a test user,
+   and adding these four scopes:
+     https://www.googleapis.com/auth/photospicker.mediaitems.readonly
+     https://www.googleapis.com/auth/photoslibrary.appendonly
+     https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata
+     https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata
+4. Walk me through creating a Web application OAuth client with
+   http://localhost:4180 as an authorised redirect URI.
+5. STOP and wait. I will paste you the client ID and client secret.
+6. Then run: GOOGLE_PHOTOS_CLIENT_ID=... GOOGLE_PHOTOS_CLIENT_SECRET=... \
+   npx -y @thenavidm/google-photos-mcp auth
+   and tell me to approve it in the browser.
+7. Add all three values to my MCP client config, then run doctor to verify.
+```
+
+### Or do it yourself
+
+Console labels move. Where a step names a button, that is what it was called at
+the time of writing. Where it describes a goal instead, that is deliberate.
+
+**Step 1: Create a project.**
+
+Go to [console.cloud.google.com](https://console.cloud.google.com/projectcreate)
+and create a project. Name it something you will recognise in six months.
+
+A project is just a container for the API access and the OAuth client. An
+existing one works, but a fresh one keeps this credential separate from
+everything else, which makes it safe to delete later.
+
+**Step 2: Turn on both APIs.**
+
+Google Photos is two separate APIs and this server uses both. Enabling one and
+not the other gives you a half-working state where picking succeeds and albums
+return `403`.
+
+- [Enable the Photos Picker API](https://console.cloud.google.com/apis/library/photospicker.googleapis.com)
+- [Enable the Photos Library API](https://console.cloud.google.com/apis/library/photoslibrary.googleapis.com)
+
+Each link opens that API in your project. Click to enable, go back, do the other.
+
+> [!IMPORTANT]
+> Check the project picker in the top bar first. Enabling an API in the wrong
+> project is the single most common way to lose half an hour here.
+
+**Step 3: Configure the consent screen.**
+
+This lives under **Google Auth Platform**. If the project has never been set up,
+its overview page offers a **Get started** button covering the same fields.
+
+| Field | What to put |
+|---|---|
+| App name | Something plain, like `Photos MCP`. Google rejects names containing its own product names, so anything with "Google" in it bounces |
+| User support email | Your own address, from the dropdown |
+| Audience | **External**, unless you have a Workspace organisation and want to restrict it to people inside it |
+| Contact information | Your email again. This one is for Google to reach you |
+
+**Step 4: Add yourself as a test user.**
+
+On the **Audience** page, add your own Google account as a test user.
+
+This is easy to skip and it is what causes `access_denied` at the end of
+sign-in. While the publishing status is **Testing**, only accounts on that list
+can authorise the app, up to 100 of them.
+
+> [!WARNING]
+> In Testing, an authorisation expires **seven days** after you grant it, and
+> the refresh token expires with it. Your setup works, then stops a week later
+> for no visible reason. Set the publishing status to **In production** on the
+> same page to stop that. For personal use this needs no verification review;
+> you click past an "unverified app" warning during sign-in.
+
+**Step 5: Add the scopes.**
+
+On the **Data access** page, add these four. If one is not in the list, paste it
+in manually.
+
+```
+https://www.googleapis.com/auth/photospicker.mediaitems.readonly
+https://www.googleapis.com/auth/photoslibrary.appendonly
+https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata
+https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata
+```
+
+Older guides ask for `photoslibrary` or `photoslibrary.readonly`. **Do not add
+those.** Google removed them on 1 April 2025, and a project requesting one now
+fails at the consent screen rather than degrading. The four above are the
+complete set still available.
+
+**Step 6: Create the OAuth client.**
+
+On the **Clients** page, create a client.
+
+- **Application type: Web application.** Not "Desktop app". A desktop client cannot be given a redirect URI, and the sign-in command needs one to catch the response.
+- **Authorised redirect URI:** `http://localhost:4180`, exactly, with no trailing slash.
+
+That port is where the `auth` command listens. If 4180 is busy, register
+`http://localhost:<your port>` instead and set `GOOGLE_PHOTOS_AUTH_PORT` to
+match. The string has to match byte for byte or Google returns
+`redirect_uri_mismatch`.
+
+Save, then copy the **client ID** and **client secret**. The secret is shown once.
+
+**Step 7: Get a refresh token.**
+
+```bash
+export GOOGLE_PHOTOS_CLIENT_ID="your-client-id"
+export GOOGLE_PHOTOS_CLIENT_SECRET="your-client-secret"
+
+npx -y @thenavidm/google-photos-mcp auth
+```
+
+A browser opens. Sign in as the account whose photos you want, click past the
+unverified-app warning, and approve the four permissions. The command prints a
+refresh token.
+
+If it prints none, this account has already consented to this client before.
+Remove the app at
+[myaccount.google.com/permissions](https://myaccount.google.com/permissions) and
+run it again.
+
+### Revoking
+
+[myaccount.google.com/permissions](https://myaccount.google.com/permissions),
+find the app, remove it. That kills every token from that client at once.
+
+The refresh token reaches your photo library until you do. Treat it like a
+password: never paste one into an issue, a gist, or a chat.
+
+## 4. Connect your client 🔌
+
+All three values go in every block below.
 
 ### Claude Code
-
-One line, from anywhere in a terminal:
 
 ```bash
 claude mcp add google-photos \
   -e GOOGLE_PHOTOS_CLIENT_ID=your-client-id \
   -e GOOGLE_PHOTOS_CLIENT_SECRET=your-client-secret \
   -e GOOGLE_PHOTOS_REFRESH_TOKEN=your-refresh-token \
-  -- npx -y @thenavidm/google-photos-mcp
+  -- npx -y @thenavidm/google-photos-mcp@latest
 ```
 
-Then run `/mcp` inside Claude Code. `google-photos` should be listed as connected.
-
-To remove it later: `claude mcp remove google-photos`.
+`--scope user` makes it available in every project rather than the current one.
+Then run `/mcp` to confirm it is connected. Remove it with
+`claude mcp remove google-photos`.
 
 ### Claude Desktop
 
-**1. Open the config file.**
-
-In Claude Desktop, go to **Settings**, then **Developer**, then click **Edit Config**. That reveals `claude_desktop_config.json` in your file manager. Open it in any text editor.
-
-If you would rather go straight there:
-
-| | |
+| Platform | Path |
 |---|---|
 | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
 | Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
-| Linux | `~/.config/Claude/claude_desktop_config.json` |
-
-On macOS you can open it from a terminal with:
-
-```bash
-open -e ~/Library/Application\ Support/Claude/claude_desktop_config.json
-```
-
-**2. Add the server.**
-
-If the file is empty or does not exist, paste this whole thing in:
 
 ```json
 {
   "mcpServers": {
     "google-photos": {
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-photos-mcp"],
+      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
       "env": {
         "GOOGLE_PHOTOS_CLIENT_ID": "your-client-id",
         "GOOGLE_PHOTOS_CLIENT_SECRET": "your-client-secret",
@@ -148,46 +286,84 @@ If the file is empty or does not exist, paste this whole thing in:
 }
 ```
 
-If you already have other servers, add only the `"google-photos": { ... }` part inside your existing `"mcpServers"`, and put a comma after the entry before it. The file has to stay valid JSON. A single missing comma or trailing comma stops every server from loading, not just this one.
+Quit Claude Desktop completely and reopen it. On macOS use Cmd+Q; closing the
+window is not enough.
 
-**3. Restart properly.**
+> [!TIP]
+> Claude Desktop does not inherit your shell PATH, so a bare `npx` can fail.
+> Use the absolute path from `which npx` as the `command`.
 
-Quit Claude Desktop completely and reopen it. On macOS closing the window is not enough, use **Cmd+Q**. On Windows quit it from the system tray. Claude only reads that file at startup.
+### claude.ai on the web
 
-**4. Check it worked.**
-
-Look for the tools icon in the message box and click it. You should see `google-photos` with its tools listed. Then ask:
-
-> What can you see in my Google Photos?
-
-If nothing appears, see [Troubleshooting](#8-troubleshooting). Claude Desktop's own logs are the fastest way in:
-
-| | |
-|---|---|
-| macOS | `~/Library/Logs/Claude/mcp-server-google-photos.log` |
-| Windows | `%APPDATA%\Claude\logs\mcp-server-google-photos.log` |
+claude.ai runs connectors from Anthropic's cloud, not from your machine, so it
+cannot launch a local command. It needs a public HTTPS URL.
 
 ```bash
-tail -n 50 ~/Library/Logs/Claude/mcp-server-google-photos.log
+npx -y @thenavidm/google-photos-mcp@latest --http --port 8000
 ```
 
-Two things account for most failures. Node is not installed or not on the PATH that Claude Desktop sees, in which case use the full path to `node` as the `command`. Or the JSON is malformed, which you can check by pasting the file into any JSON validator.
+Host that somewhere with a public HTTPS URL, then in claude.ai: **Customize**,
+**Connectors**, **+**, **Add custom connector**. Paste the URL and click **Add**.
+
+On Team and Enterprise an owner adds it first under **Organization settings,
+Connectors**, then each member enables it under **Customize, Connectors**. Free
+is limited to one custom connector. A server behind a VPN or firewall will not
+connect.
 
 ### Cursor
 
-Create `~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` inside a single project. Use the same JSON as Claude Desktop. Then reload the window, or open **Settings**, **MCP**, and toggle the server.
+`~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one. Same JSON
+as Claude Desktop, key `mcpServers`. Reload the window afterwards.
 
 ### Windsurf
 
-`~/.codeium/windsurf/mcp_config.json`, same JSON, then reload.
+`~/.codeium/windsurf/mcp_config.json`, same JSON, key `mcpServers`, then reload.
 
 ### VS Code
 
-`.vscode/mcp.json` in a project, or run **MCP: Add Server** from the command palette.
+`.vscode/mcp.json`. The key is **`servers`**, not `mcpServers`, and each entry
+needs a `type`:
+
+```json
+{
+  "servers": {
+    "google-photos": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
+      "env": {
+        "GOOGLE_PHOTOS_CLIENT_ID": "your-client-id",
+        "GOOGLE_PHOTOS_CLIENT_SECRET": "your-client-secret",
+        "GOOGLE_PHOTOS_REFRESH_TOKEN": "your-refresh-token"
+      }
+    }
+  }
+}
+```
+
+### Codex CLI
+
+`~/.codex/config.toml`:
+
+```toml
+[mcp_servers.google-photos]
+command = "npx"
+args = ["-y", "@thenavidm/google-photos-mcp@latest"]
+
+[mcp_servers.google-photos.env]
+GOOGLE_PHOTOS_CLIENT_ID = "your-client-id"
+GOOGLE_PHOTOS_CLIENT_SECRET = "your-client-secret"
+GOOGLE_PHOTOS_REFRESH_TOKEN = "your-refresh-token"
+```
+
+### Gemini CLI
+
+`~/.gemini/settings.json`, same JSON as Claude Desktop, key `mcpServers`.
 
 ### Everything else
 
-Zed, Cline, Continue and anything else that speaks MCP over stdio all work. They each keep their config somewhere different, but they all want the same three things: the `command` (`npx`), the `args`, and the `env` with your three credentials.
+Zed, Cline, Continue and anything else that speaks MCP over stdio take the same
+three things: the command `npx`, the args, and the env block.
 
 ### Docker
 
@@ -200,81 +376,30 @@ docker run -i --rm \
   google-photos-mcp
 ```
 
-### Self-hosting
+## 5. Check it worked 🩺
 
 ```bash
-google-photos-mcp --http --port=8787
+npx -y @thenavidm/google-photos-mcp@latest doctor
 ```
 
-It binds to `127.0.0.1` and serves `/health`. To reach it from elsewhere, set
-`GOOGLE_PHOTOS_HTTP_HOST=0.0.0.0` and `GOOGLE_PHOTOS_HTTP_TOKEN` to a random
-string, and put it behind TLS. Anyone who reaches that port can upload to your
-photo library.
+`doctor` checks four things in the order they fail and stops at the first real
+problem: credentials present, refresh token mints an access token, every scope
+actually landed in the grant, and one live API call.
 
-### Check it worked
+| Symptom | Cause |
+|---|---|
+| `Missing: GOOGLE_PHOTOS_...` | A value is not reaching the server. Check the JSON is valid |
+| `invalid_grant` | Seven days passed with the consent screen in Testing, or the token was revoked |
+| `The grant is missing N scope(s)` | A scope was added after the token was minted. Run `auth` again |
 
-```bash
-npx @thenavidm/google-photos-mcp doctor
-```
+## 6. Tools 🛠️
 
-`doctor` checks the credentials, mints a token, verifies every scope actually
-landed in the grant, and makes one real API call. It stops at the first genuine
-problem rather than leaving you to guess which of four things is wrong.
-
-## 3. Connect your account
-
-Google Photos has no API keys and no service accounts. Google does not support
-service accounts for these APIs at all, so the only way in is an OAuth client
-that you own, authorised by the account whose photos you want to reach.
-
-That means about ten minutes in the Google Cloud console, once.
-
-**[references/setup.md](references/setup.md) is the full walkthrough.** It covers
-creating the project, the two APIs to enable, the consent screen, the exact four
-scopes, the redirect URI, and the seven-day expiry that catches everyone.
-
-The short version:
-
-1. Create a Google Cloud project.
-2. Enable the **Photos Picker API** and the **Photos Library API**. Both.
-3. Configure the consent screen and add your own account as a test user.
-4. Add the four scopes listed in the walkthrough.
-5. Create a **Web application** OAuth client with `http://localhost:4180` as an authorised redirect URI.
-6. Run the sign-in command:
-
-```bash
-export GOOGLE_PHOTOS_CLIENT_ID="your-client-id"
-export GOOGLE_PHOTOS_CLIENT_SECRET="your-client-secret"
-
-npx -y @thenavidm/google-photos-mcp auth
-```
-
-It opens a browser, you approve, and it prints a refresh token. Those three
-values go in your client config.
-
-**Treat the refresh token like a password.** It reaches your photo library until
-you revoke it at [myaccount.google.com/permissions](https://myaccount.google.com/permissions).
-
-### The seven-day catch
-
-While your OAuth consent screen is in **Testing**, Google expires every
-authorisation after seven days, refresh token included. Your setup works, then
-stops a week later with `invalid_grant`.
-
-Set the publishing status to **In production** to stop that happening. For
-personal use this needs no verification review; you just click past an
-"unverified app" warning during sign-in.
-
-## 4. Tools
-
-27 tools. Run `doctor` to see how many are active, which drops to 14 in
-read-only mode.
+28 tools. Read-only mode leaves 15.
 
 ### Picking from your library
 
-The only route to photos this server did not upload. Asynchronous by design:
-`start_pick_session` returns a URL, and nothing is visible until a human has
-actually used it.
+The only route to photos this server did not upload. Asynchronous by design: a
+human has to actually use the URL before anything is visible.
 
 | Tool | What it does |
 |---|---|
@@ -295,7 +420,7 @@ actually used it.
 | `unshare_album` | Revoke the link |
 | `list_shared_albums` | Shared albums, with their links |
 | `add_to_album` | Add up to 50 items |
-| `remove_from_album` | Remove up to 50 items, keeping them in the library |
+| `remove_from_album` | Remove up to 50, keeping them in the library |
 | `add_album_enrichment` | Insert a caption, a place, or a map between photos |
 
 ### Media
@@ -324,162 +449,138 @@ actually used it.
 | Tool | What it does |
 |---|---|
 | `auth_status` | Which account, which scopes, and what is missing |
+| `quota_status` | How much of the daily budget is left |
 | `raw` | Call an endpoint this server does not wrap |
 
 ### Resources and prompts
 
 Two resources: `google-photos://status` for the connection, and
 `google-photos://capabilities` for a plain account of what the API can and
-cannot do. A model that reads the second stops proposing things that were
-removed in 2025.
+cannot do. A model that reads the second stops proposing things Google removed.
 
 Three prompts: **pick-and-work**, **build-album**, and **diagnose**.
 
-## 5. Writing safely
+## 7. Notes and gotchas 📓
 
-Writes work by default. A server where every write needs a flag teaches you to
-pass that flag reflexively, which is worse protection than none because it looks
-like a safeguard.
+**Google removed whole-library read on 1 April 2025.** The `photoslibrary`,
+`photoslibrary.readonly` and `photoslibrary.sharing` scopes are gone for
+third-party apps, with no replacement outside Google's partner programme. Any
+tool offering to search your entire library is either on a grandfathered grant
+or searching only what it uploaded and calling that your library.
 
-Instead, two operations require `confirm: true`, and they are the two that
-genuinely cannot be walked back:
+**So an empty listing means "this server uploaded nothing", not "you have no
+photos."** The tool descriptions say so, so a model does not report it wrongly.
 
-**Uploading.** `upload_from_url`, `upload_file`, `save_to_library`,
-`create_album_with_media`. Google exposes no delete endpoint for media items, so
-a mistaken upload has to be removed by hand in the Google Photos app, in among
-your real photos.
+**There is no delete.** No endpoint exists to remove a media item, for anyone. An
+upload is permanent as far as any API is concerned, and has to be removed by
+hand in the Google Photos app. This is why uploads need `confirm: true`.
 
-**Sharing.** `share_album` mints a URL anyone can open without signing in. A
-link that has been sent cannot be unsent. `unshare_album` revokes it, but not
-from whoever already opened it.
+**There is no free-text search.** You cannot search for "beach". Content
+categories are Google's own classifier and are the nearest equivalent. Call
+`describe_filter_capabilities` rather than guessing a category name; a wrong one
+is rejected, not ignored.
 
-Creating an album, renaming one, or setting a description are not guarded. Each
-is one call to undo, and confirming everything is how you train a model to
-confirm without reading.
+**`album_id` cannot be combined with any other filter.** Google rejects it.
 
-### Turning writes off entirely
+**A `base_url` is not a link.** It expires in about 60 minutes and serves nothing
+without a size suffix: `=d` for the original, `=w2048-h2048` resized, `=dv` for
+video. Use `download_media_item` or `download_picked`, which resolve a fresh URL
+and pick the right suffix.
 
-```
-GOOGLE_PHOTOS_READ_ONLY=1
-```
-
-Every write disappears from the tool list, leaving 14 read tools. Not an error
-on call: a model cannot misuse a tool it cannot see.
-
-To keep ordinary writes but block uploading and sharing:
-
-```
-GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0
-```
-
-### An audit log
-
-```
-GOOGLE_PHOTOS_AUDIT_LOG=/path/to/photos-writes.log
-```
-
-One JSON line per attempted write, allowed and blocked alike.
-
-### Annotations
-
-Every tool carries MCP annotations, so a client can auto-approve reads and stop
-on the rest without parsing descriptions.
-
-### Prompt injection
-
-Descriptions and filenames in a photo library are text somebody wrote, and a
-shared album can be written to by other people. Treat anything read from the
-API as data, never as instructions. The server's own instructions say this to
-the model as well.
-
-## 6. What the API can and cannot do
-
-**Can**
-
-- Let you pick anything from your library, then read it
-- Upload photos and videos
-- Create, rename, share and unshare albums
-- Add and remove items from albums it created
-- Add captions, locations and maps to albums
-- Set descriptions and album covers
-- Filter its own uploads by date, content category, media type and favourites
-
-**Cannot**
-
-- Browse, search or read photos it did not upload. Removed for all apps in 2025
-- Free-text search. There is no query-by-word endpoint for any app. Content
-  categories are Google's own classifier and are the nearest equivalent
-- Search by face, person or location
-- **Delete a media item.** No endpoint exists, for anyone
-- Mark a photo as a favourite, or archive one
-- Touch a shared album it did not create
-
-`describe_filter_capabilities` returns this same list to the model, at no API
-cost, which stops it guessing category names.
-
-## 7. Your data
-
-Everything runs on your machine, between you and Google. There is no service in
-the middle and nothing is sent anywhere else.
-
-The refresh token sits wherever you put it, in your MCP client's config file.
-This server never writes it to disk itself.
-
-Photo bytes are fetched only when a download tool is called, held in memory long
-enough to return, and never cached.
-
-Revoke access any time at
-[myaccount.google.com/permissions](https://myaccount.google.com/permissions).
-
-## 8. Troubleshooting
-
-Run `doctor` first. It checks four things in the order they fail and stops at
-the first real problem, because a report listing four symptoms of one cause
-sends you fixing the wrong thing.
-
-**Everything returns a permission error.** The grant is missing a scope. Adding
-a scope in the console does not upgrade an existing token, so run `auth` again.
-`doctor` names the missing one.
-
-**`invalid_grant`, and it worked last week.** Seven days have passed with the
-consent screen in Testing. Publish it, or re-run `auth`.
-
-**`invalid_client`.** The id or secret does not match the project. Check for a
-literal `\n` at the end, which a copy-paste out of a quoted string leaves behind
-and which is invisible in most editors.
-
-**`redirect_uri_mismatch` during `auth`.** The registered URI is not exactly
-`http://localhost:4180`. No trailing slash, `http` not `https`, `localhost` not
-`127.0.0.1`.
-
-**A read returns nothing.** Almost always correct. It means this server has
-uploaded nothing yet, not that your library is empty. Use `start_pick_session`.
-
-**A `base_url` returns 403.** They expire in about an hour and need a size
-suffix. Use `download_media_item` or `download_picked` instead of the raw URL.
-
-**Quota exhausted.** 10,000 requests per project per day, resetting at midnight
-Pacific. `get_media_items` fetches 50 in one request where `get_media_item`
+**Two separate daily quotas**, both resetting at midnight UTC: 10,000 API
+requests and 75,000 media-byte requests. Fetching bytes spends the second, not
+the first. `get_media_items` fetches 50 in one request where `get_media_item`
 would spend 50.
 
-## 9. Run it from source
+**Writes work by default.** Two things need `confirm: true`, and only two:
+uploading, because there is no delete, and `share_album`, because a link that
+has been sent cannot be recalled. Creating or renaming an album does not.
+Confirming everything trains a model to confirm without reading.
 
-```bash
-git clone https://github.com/navidmoazzez/google-photos-mcp.git
-cd google-photos-mcp
-npm install
-npm run build
-npm test
-```
+`GOOGLE_PHOTOS_READ_ONLY=1` removes every write from the tool list.
+`GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0` keeps ordinary writes and blocks uploading
+and sharing. `GOOGLE_PHOTOS_AUDIT_LOG=<path>` records every attempted write.
 
-Then point your client at `dist/index.js` with `node` as the command, as noted
-in [Install](#2-install).
+**Album titles and descriptions are text other people wrote**, and a
+collaborative shared album can be written to by anyone with the link. Treat
+anything read back as data, never as instructions.
+
+## 8. Troubleshooting 🔧
+
+| Symptom | Cause and fix |
+|---|---|
+| Everything returns a permission error | The grant is missing a scope. Adding one in the console does not upgrade an existing token: run `auth` again. `doctor` names which |
+| `invalid_grant`, worked last week | Seven days passed with the consent screen in Testing. Publish it, or re-run `auth` |
+| `invalid_client` | The id or secret does not match the project. Check for a literal `\n` left by a copy-paste out of a quoted string |
+| `redirect_uri_mismatch` during `auth` | The registered URI is not exactly `http://localhost:4180`. No trailing slash, `http` not `https`, `localhost` not `127.0.0.1` |
+| `access_denied` after signing in | Your account is not on the test user list, or you signed in as a different one |
+| A read returns nothing | Almost always correct. This server has uploaded nothing yet. Use `start_pick_session` |
+| A `base_url` returns 403 | It expired, or has no size suffix. Use `download_media_item` |
+| `RESOURCE_EXHAUSTED` | Daily quota. Check `quota_status`; it resets at midnight UTC |
+| Nothing appears in Claude Desktop | Node is not on the PATH Desktop sees, or the JSON is malformed. Check `~/Library/Logs/Claude/mcp-server-google-photos.log` |
+
+## FAQ ❓
+
+**What is an MCP server?**
+Model Context Protocol is an open standard that lets an AI assistant use outside
+tools. An MCP server exposes a set of tools, and any MCP client (Claude Code,
+Claude Desktop, Cursor, Windsurf, VS Code, Codex CLI, Gemini CLI) can call them.
+This one exposes Google Photos.
+
+**Can it search all my photos?**
+No, and nothing can. Google removed that for third-party apps on 1 April 2025.
+It can show you a picker, and you choose what it sees.
+
+**Can it delete a photo?**
+No. Google exposes no delete endpoint to any app. That is also why uploading
+asks for confirmation.
+
+**Does it upload my photos anywhere?**
+No. It runs on your machine and talks directly to Google. There is no service in
+the middle. Photo bytes are held in memory for one call and never cached.
+
+**Is my refresh token safe?**
+It is scoped to four permissions and no more: read what you pick, upload, read
+back what it uploaded, edit what it created. It cannot read your existing photos
+and cannot reach any other Google service. It still reaches a real photo
+library, so treat it as a password. Revoke at
+[myaccount.google.com/permissions](https://myaccount.google.com/permissions).
+
+**Why do I have to create my own Google Cloud project?**
+Google Photos has no API keys and does not support service accounts. A user
+OAuth grant is the only way in, and a grant needs a client. Setup is once.
+
+**Why did it stop working after a week?**
+The OAuth consent screen is in Testing, where Google expires authorisations
+after seven days. Set it to In production.
+
+**Do I need Google to verify my app?**
+Not for your own use. You click past an "unverified app" warning. Verification
+matters only when other people will use your client, and Google Photos scopes
+need a separate review on top of the usual one.
+
+**Can I run it for more than one Google account?**
+One account per server instance. Run a second instance with a different refresh
+token under a different name in your client config.
+
+**Can I use it from claude.ai on the web?**
+Yes, but claude.ai runs connectors from Anthropic's cloud, so it needs the HTTP
+transport hosted somewhere with a public HTTPS URL. See
+[section 4](#4-connect-your-client-).
+
+**How do I stop an agent changing anything?**
+`GOOGLE_PHOTOS_READ_ONLY=1`. The write tools are not registered at all, so a
+model cannot call what it cannot see.
+
+**How do I know it is actually working?**
+`doctor`. It tests credentials, scopes and a live API call, and names the first
+real problem rather than leaving you to guess.
 
 ## Questions
 
 Run into a problem or have a question? [Open an issue](https://github.com/navidmoazzez/google-photos-mcp/issues) and I will help.
 
-## About the author
+## About the author 👋
 
 Navid Moazzez is a leading AI business strategist, and the host of the AI Creator Summit, watched by 100,000+ creators. He helps creators and founders master AI and build their own AI Operating System (AI OS) to automate their business and life. This Google Photos MCP server is one piece of that system.
 

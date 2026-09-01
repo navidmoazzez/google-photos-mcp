@@ -12,6 +12,7 @@
 
 import { PhotosError, toPhotosError } from "./errors.js";
 import { TokenStore } from "./auth.js";
+import { QuotaTracker } from "./quota.js";
 import type { Config } from "../config.js";
 
 export const PICKER_BASE = "https://photospicker.googleapis.com/v1";
@@ -23,6 +24,7 @@ export type Api = "picker" | "library";
 export class PhotosClient {
   private readonly config: Config;
   private readonly tokens: TokenStore;
+  readonly quota = new QuotaTracker();
 
   constructor(config: Config) {
     this.config = config;
@@ -58,6 +60,12 @@ export class PhotosClient {
     const retryable = method === "GET" || method === "HEAD";
     const attempts = retryable ? this.config.maxRetries + 1 : 1;
     let lastError: unknown;
+
+    // Checked once, before the first attempt. A retry of an already-counted
+    // call should not be billed twice, and should not be blocked by a ceiling
+    // the original call was under.
+    this.quota.check("request");
+    this.quota.record("request");
 
     for (let attempt = 0; attempt < attempts; attempt++) {
       const token = await this.tokens.accessToken();
@@ -163,6 +171,9 @@ export class PhotosClient {
 
   /** Fetch bytes from a baseUrl or any public URL, with a size ceiling. */
   async fetchBytes(url: string, maxBytes: number): Promise<{ bytes: Uint8Array; mimeType: string }> {
+    // Media bytes come out of their own 75,000/day budget, not the 10,000 one.
+    this.quota.check("media");
+    this.quota.record("media");
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), Math.max(this.config.requestTimeoutMs, 120_000));
     try {

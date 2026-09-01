@@ -62,6 +62,16 @@ export const metaTools: AnyToolSpec[] = [
   }),
 
   defineTool({
+    name: "quota_status",
+    title: "Check how much daily quota is left",
+    description:
+      "Report how much of the Google Cloud project's daily budget this server has spent: 10,000 API requests and 75,000 media-byte requests, both resetting at midnight UTC.\n\nCounted by this process since it started, so it is a floor rather than a true reading. Worth checking before a long batch, and worth reading when calls start failing with RESOURCE_EXHAUSTED.",
+    schema: {},
+    risk: "read",
+    handler: async (_args, ctx) => ctx.client.quota.status(),
+  }),
+
+  defineTool({
     name: "raw",
     title: "Call a Google Photos endpoint directly",
     description:

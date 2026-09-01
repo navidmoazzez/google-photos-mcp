@@ -6,7 +6,7 @@ description: |
 
 # Google Photos
 
-27 tools across two APIs: the Picker, for reaching the user's whole library
+28 tools across two APIs: the Picker, for reaching the user's whole library
 through them, and the Library API, for media this server uploaded.
 
 ## The one thing to understand first

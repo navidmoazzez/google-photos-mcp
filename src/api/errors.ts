@@ -77,7 +77,7 @@ function hintFor(status: number, reason: string, message: string): string | unde
     return "The access token was rejected. Usually the refresh token was revoked, or the OAuth consent screen is in Testing mode, where refresh tokens expire after 7 days. Re-run `google-photos-mcp auth`.";
   }
   if (status === 429 || reason === "RESOURCE_EXHAUSTED") {
-    return "Google Photos API quota is exhausted. The default is 10,000 requests per project per day and it resets at midnight Pacific.";
+    return "Google Photos API quota is exhausted. The default is 10,000 requests per project per day and it resets at midnight UTC.";
   }
   if (status === 404 || reason === "NOT_FOUND") {
     return "Either the id is wrong, or it names something this app did not create. The Library API cannot see media or albums created by anyone else, including the user.";
