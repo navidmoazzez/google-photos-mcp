@@ -11,15 +11,17 @@
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 
-Google Photos MCP connects your photo library to Claude, Cursor, and any other AI
-agent. It opens a picker so you choose what the agent sees, it uploads photos and
-videos, it builds and shares albums, and it adds captions, places and maps between
-the pictures.
+Google Photos MCP server for Claude Code and AI agents. Picker-based reads, uploads, albums, sharing and metadata.
 
-There are 29 tools, and the picker is the point of all of them. Google removed
-whole-library access for every third-party app in April 2025, so asking you to choose
-is the only honest way in, and this server is built around that rather than
-pretending otherwise. You can connect as many Google accounts as you need.
+It opens Google's own picker, so you choose exactly what the agent sees.
+
+It uploads photos and videos, builds and shares albums, and writes captions.
+
+Google removed whole-library access for every third-party app in April 2025. Asking you to choose is the only honest way in, so this server is built around the picker rather than pretending otherwise.
+
+29 tools. Connect as many Google accounts as you need.
+
+Built and maintained by [Navid Moazzez](https://navid.me).
 
 ```
 You:    I want to put my Iceland shots into a shared album.
@@ -35,7 +37,6 @@ Claude: [check_pick_session → list_picked_media → save_to_library → create
         called "Iceland 2026". Want me to share it?
 ```
 
-Built by [Navid Moazzez](https://navid.me).
 
 ## Contents
 
