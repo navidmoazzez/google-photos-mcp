@@ -33,10 +33,10 @@
   "homepage": "https://navid.me",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thenavidm/google-photos-mcp.git"
+    "url": "git+https://github.com/navidmoazzez/google-photos-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/thenavidm/google-photos-mcp/issues"
+    "url": "https://github.com/navidmoazzez/google-photos-mcp/issues"
   },
   "keywords": [
     "mcp",

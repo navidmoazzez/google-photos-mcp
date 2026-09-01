@@ -465,7 +465,7 @@ would spend 50.
 ## 9. Run it from source
 
 ```bash
-git clone https://github.com/thenavidm/google-photos-mcp.git
+git clone https://github.com/navidmoazzez/google-photos-mcp.git
 cd google-photos-mcp
 npm install
 npm run build
@@ -477,7 +477,7 @@ in [Install](#2-install).
 
 ## Questions
 
-Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-photos-mcp/issues) and I will help.
+Run into a problem or have a question? [Open an issue](https://github.com/navidmoazzez/google-photos-mcp/issues) and I will help.
 
 ## About the author
 
@@ -500,7 +500,7 @@ Navid Moazzez is a leading AI business strategist, and the host of the AI Creato
 
 ## Security
 
-Found a vulnerability? [Report it privately](https://github.com/thenavidm/google-photos-mcp/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
+Found a vulnerability? [Report it privately](https://github.com/navidmoazzez/google-photos-mcp/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
 
 ## License
 

@@ -37,7 +37,7 @@ Options:
 Setting up the Google Cloud project takes about ten minutes and is the only
 fiddly part. The walkthrough is in references/setup.md.
 
-https://github.com/thenavidm/google-photos-mcp
+https://github.com/navidmoazzez/google-photos-mcp
 `;
 
 async function runAuth(): Promise<number> {
