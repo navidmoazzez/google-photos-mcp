@@ -6,6 +6,8 @@
 
 [![Stars](https://img.shields.io/github/stars/navidmoazzez/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/navidmoazzez/google-photos-mcp)
 [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/@thenavidm/google-photos-mcp?color=orange&label=npm)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
+[![Downloads](https://img.shields.io/npm/dm/@thenavidm/google-photos-mcp?color=green&label=downloads)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
 [![CI](https://img.shields.io/github/actions/workflow/status/navidmoazzez/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/navidmoazzez/google-photos-mcp/actions)
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
@@ -40,7 +42,8 @@ Built by [Navid Moazzez](https://navid.me).
 | 6 | [Tools](#6-tools-) | All 28 |
 | 7 | [Notes and gotchas](#7-notes-and-gotchas-) | What the API will not do |
 | 8 | [Troubleshooting](#8-troubleshooting-) | Symptom to cause |
-| | [FAQ](#faq-) | |
+| 9 | [FAQ](#9-faq-) | Twelve questions, including what an MCP server is |
+| 10 | [What changed](#10-what-changed-) | Every release |
 
 ## 1. What you can ask it 💬
 
@@ -71,10 +74,6 @@ something that reads like a story, and almost nothing else drives it.
 ## 2. Quick install ⚡
 
 Node 20 or newer. Nothing else.
-
-> [!NOTE]
-> Not published to npm yet, so the `npx` commands on this page will not resolve
-> until the first release is tagged. Everything else here is accurate.
 
 ```bash
 npx -y @thenavidm/google-photos-mcp --version
@@ -519,7 +518,7 @@ anything read back as data, never as instructions.
 | `RESOURCE_EXHAUSTED` | Daily quota. Check `quota_status`; it resets at midnight UTC |
 | Nothing appears in Claude Desktop | Node is not on the PATH Desktop sees, or the JSON is malformed. Check `~/Library/Logs/Claude/mcp-server-google-photos.log` |
 
-## FAQ ❓
+## 9. FAQ ❓
 
 **What is an MCP server?**
 Model Context Protocol is an open standard that lets an AI assistant use outside
@@ -575,6 +574,11 @@ model cannot call what it cannot see.
 **How do I know it is actually working?**
 `doctor`. It tests credentials, scopes and a live API call, and names the first
 real problem rather than leaving you to guess.
+
+## 10. What changed 📦
+
+Every release, newest first, in [VERSIONS.md](./VERSIONS.md), with the upstream
+API and action versions this was last checked against.
 
 ## Questions
 
