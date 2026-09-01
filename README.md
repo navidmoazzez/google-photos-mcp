@@ -7,7 +7,6 @@
 [![Stars](https://img.shields.io/github/stars/navidmoazzez/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/navidmoazzez/google-photos-mcp)
 [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
 [![npm](https://img.shields.io/npm/v/@thenavidm/google-photos-mcp?color=orange&label=npm)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
-[![Downloads](https://img.shields.io/npm/dm/@thenavidm/google-photos-mcp?color=green&label=downloads)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
 [![CI](https://img.shields.io/github/actions/workflow/status/navidmoazzez/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/navidmoazzez/google-photos-mcp/actions)
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
@@ -50,34 +49,26 @@ Built by [Navid Moazzez](https://navid.me).
 | 6 | [Tools](#6-tools-) | All 29 |
 | 7 | [Notes and gotchas](#7-notes-and-gotchas-) | What the API will not do |
 | 8 | [Troubleshooting](#8-troubleshooting-) | Symptom to cause |
-| 9 | [FAQ](#9-faq-) | Twelve questions, including what an MCP server is |
+| 9 | [FAQ](#9-faq-) | Common questions |
 | 10 | [What changed](#10-what-changed-) | Every release |
 
 ## 1. What you can ask it 💬
 
-> Let me pick some photos and tell me what I chose.
+- Let me pick some photos, then tell me what I chose.
+- Put these six product shots in a new album called "Q3 Launch" and give me a link to share.
+- Which of the ones you uploaded are videos, and how long are they?
+- Write a description on everything in the launch album.
+- Stop sharing the Iceland album.
+- Save what I just picked into my library so you can organise it later.
+- Upload this to my brand account, not my personal one.
+- Download the third photo I picked and tell me whether it is sharp enough to print.
+- What can you actually see in my Google Photos, and what can you not?
+- Add a caption between the second and third photo, then a map from Reykjavik to Vik.
 
-> Make an album called "Q3 Launch Assets" and upload these six URLs into it.
-
-> Which of the photos you uploaded are videos?
-
-> Set a description on everything in the launch album.
-
-> Share the Iceland album and give me the link.
-
-> Stop sharing that album.
-
-> What can you actually see in my Google Photos?
-
-> Download the third photo I picked so you can look at it.
-
-> Add a caption between the second and third photo in that album.
-
-> How much of today's API quota have we used?
-
-The one to notice is the caption. Album enrichments put a text note, a place, or
-a map between two points inline between photos. It is what turns an album into
-something that reads like a story, and almost nothing else drives it.
+**The last one is the point.** An album enrichment is a caption, a place, or a
+map between two points, sitting inline between the photos rather than in a
+description nobody opens. It is what makes an album read as a story, and almost
+nothing outside Google's own app drives it.
 
 ## 2. Quick install ⚡
 
