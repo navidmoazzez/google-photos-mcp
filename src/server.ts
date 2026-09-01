@@ -8,7 +8,7 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { PhotosClient } from "./api/client.js";
+import { ClientPool } from "./api/pool.js";
 import { loadConfig, isConfigured, type Config } from "./config.js";
 import { WriteGuard } from "./safety.js";
 import { ALL_TOOLS } from "./tools/index.js";
@@ -34,28 +34,28 @@ Start with auth_status to confirm the connection, describe_filter_capabilities b
 
 export type BuiltServer = {
   server: McpServer;
-  client: PhotosClient;
+  pool: ClientPool;
   config: Config;
   toolCount: number;
 };
 
 export function buildServer(config: Config = loadConfig()): BuiltServer {
-  const client = new PhotosClient(config);
+  const pool = new ClientPool(config);
   const guard = new WriteGuard(config);
-  const ctx = makeContext(client, config, guard);
 
   const server = new McpServer({ name: "google-photos", version: VERSION }, { instructions: INSTRUCTIONS });
 
   // A read-only server should not advertise writes it will refuse.
   const tools = ALL_TOOLS.filter((tool) => !guard.readOnly || tool.risk === "read");
   for (const tool of tools) {
-    register(server, () => ctx, tool);
+    // Resolved per call, because which account acts depends on the arguments.
+    register(server, (hint) => makeContext(pool, hint, config, guard), tool);
   }
 
   registerResources(server, config);
   registerPrompts(server);
 
-  return { server, client, config, toolCount: tools.length };
+  return { server, pool, config, toolCount: tools.length };
 }
 
 /**

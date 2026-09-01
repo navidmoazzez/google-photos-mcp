@@ -13,7 +13,7 @@
 import { PhotosError, toPhotosError } from "./errors.js";
 import { TokenStore } from "./auth.js";
 import { QuotaTracker } from "./quota.js";
-import type { Config } from "../config.js";
+import type { Account, Config } from "../config.js";
 
 export const PICKER_BASE = "https://photospicker.googleapis.com/v1";
 export const LIBRARY_BASE = "https://photoslibrary.googleapis.com/v1";
@@ -24,11 +24,16 @@ export type Api = "picker" | "library";
 export class PhotosClient {
   private readonly config: Config;
   private readonly tokens: TokenStore;
-  readonly quota = new QuotaTracker();
+  readonly account: Account;
+  /** Shared across accounts: the daily cap is per Google Cloud project, and
+   *  two accounts authorised through the same project spend the same budget. */
+  readonly quota: QuotaTracker;
 
-  constructor(config: Config) {
+  constructor(account: Account, config: Config, quota: QuotaTracker) {
+    this.account = account;
     this.config = config;
-    this.tokens = new TokenStore(config);
+    this.quota = quota;
+    this.tokens = new TokenStore(account);
   }
 
   async accessToken(): Promise<string> {

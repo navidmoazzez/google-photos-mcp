@@ -9,15 +9,16 @@
 
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { buildServer } from "../src/server.js";
-import { loadConfig, cleanEnv, isConfigured, missingCredentials } from "../src/config.js";
+import { loadConfig, cleanEnv, isConfigured, missingCredentials, selectAccount } from "../src/config.js";
 import { WriteGuard } from "../src/safety.js";
 import { shapeItem, shapeAlbum, page } from "../src/format/items.js";
 import { ALL_TOOLS } from "../src/tools/index.js";
 
+const account = { name: "default", clientId: "id", clientSecret: "secret", refreshToken: "refresh" };
+
 const baseConfig = {
-  clientId: "id",
-  clientSecret: "secret",
-  refreshToken: "refresh",
+  accounts: [account],
+  preferred: [],
   readOnly: false,
   allowDestructive: true,
   requestTimeoutMs: 1000,
@@ -37,8 +38,47 @@ describe("config", () => {
   });
 
   it("names exactly what is missing", () => {
-    expect(isConfigured({ ...baseConfig, refreshToken: "" })).toBe(false);
-    expect(missingCredentials({ ...baseConfig, refreshToken: "" })).toEqual(["GOOGLE_PHOTOS_REFRESH_TOKEN"]);
+    const broken = { ...baseConfig, accounts: [{ ...account, refreshToken: "" }] };
+    expect(isConfigured(broken)).toBe(false);
+    expect(missingCredentials(broken)).toEqual(["GOOGLE_PHOTOS_REFRESH_TOKEN"]);
+  });
+
+  it("prefers an exact account name over a prefix of a longer one", () => {
+    // "navid" is a prefix of "navid-brand". A pure prefix match would be
+    // ambiguous and could send an upload to the wrong library.
+    const multi = {
+      ...baseConfig,
+      accounts: [
+        { ...account, name: "navid-brand" },
+        { ...account, name: "navid" },
+      ],
+    };
+    expect(selectAccount(multi, "navid").name).toBe("navid");
+    expect(selectAccount(multi, "navid-brand").name).toBe("navid-brand");
+  });
+
+  it("refuses an ambiguous prefix rather than guessing", () => {
+    const multi = {
+      ...baseConfig,
+      accounts: [
+        { ...account, name: "work-one" },
+        { ...account, name: "work-two" },
+      ],
+    };
+    expect(() => selectAccount(multi, "work")).toThrow(/more than one account/);
+  });
+
+  it("honours the preferred account when a tool names none", () => {
+    const multi = {
+      ...baseConfig,
+      accounts: [{ ...account, name: "personal" }, { ...account, name: "brand" }],
+      preferred: ["brand"],
+    };
+    expect(selectAccount(multi).name).toBe("brand");
+  });
+
+  it("names the configured accounts when asked for one that does not exist", () => {
+    expect(() => selectAccount(baseConfig, "nope")).toThrow(/Configured: default/);
   });
 
   it("defaults to writes enabled", () => {
@@ -181,10 +221,12 @@ describe("search filters", () => {
       text: async () => JSON.stringify({ mediaItems: [] }),
     });
     const { PhotosClient } = await import("../src/api/client.js");
+    const { QuotaTracker } = await import("../src/api/quota.js");
     const { mediaTools } = await import("../src/tools/media.js");
     const tool = mediaTools.find((t) => t.name === "search_library");
     const ctx = {
-      client: new PhotosClient(baseConfig),
+      client: new PhotosClient(account, baseConfig, new QuotaTracker()),
+      account,
       config: baseConfig,
       guard: new WriteGuard(baseConfig),
     };

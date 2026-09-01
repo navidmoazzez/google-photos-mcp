@@ -1,7 +1,7 @@
 {
   "name": "@thenavidm/google-photos-mcp",
-  "version": "1.0.0",
-  "description": "MCP server for Google Photos. 27 tools covering the Picker API for whole-library selection and the Library API for albums, uploads and app-created media, with LLM-optimised output. Works with Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client.",
+  "version": "1.0.1",
+  "description": "Google Photos MCP server for Claude Code and AI agents. Photo picker, uploads, albums, sharing, enrichments, descriptions, app-created media search, and multiple Google accounts.",
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
@@ -33,8 +33,8 @@
     "vitest": "^2.1.0"
   },
   "license": "MIT",
-  "author": "Navid Moazzez <https://navid.me>",
-  "homepage": "https://navid.me",
+  "author": "Navid Moazzez (https://navid.me)",
+  "homepage": "https://github.com/navidmoazzez/google-photos-mcp#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/navidmoazzez/google-photos-mcp.git"
@@ -59,5 +59,8 @@
     "README.md",
     "SKILL.md",
     "LICENSE"
+  ],
+  "contributors": [
+    "Navid Moazzez (https://navid.me)"
   ]
 }

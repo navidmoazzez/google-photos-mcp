@@ -15,7 +15,7 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { z } from "zod";
-import { defineTool, confirmArg, type AnyToolSpec } from "./kit.js";
+import { defineTool, confirmArg, type AnyToolSpec , accountArg } from "./kit.js";
 import { shapeAlbum, shapeItem, type RawAlbum, type RawMediaItem } from "../format/items.js";
 import type { ToolContext } from "./kit.js";
 
@@ -74,6 +74,7 @@ export const uploadTools: AnyToolSpec[] = [
       description: z.string().max(1000).optional().describe("Description applied to every uploaded item."),
       max_mb: z.number().min(1).max(200).optional().describe("Skip any file larger than this, in MB. Default 100."),
       ...confirmArg,
+      ...accountArg,
     },
     risk: "destructive",
     summary: (args) => `upload ${args.urls.length} file(s) from URL into the user's Google Photos library`,
@@ -110,6 +111,7 @@ export const uploadTools: AnyToolSpec[] = [
       album_id: z.string().optional().describe("Put it straight into this album, which this app must have created."),
       description: z.string().max(1000).optional().describe("Description for the uploaded item."),
       ...confirmArg,
+      ...accountArg,
     },
     risk: "destructive",
     summary: (args) => `upload ${args.path} into the user's Google Photos library`,
@@ -138,6 +140,7 @@ export const uploadTools: AnyToolSpec[] = [
       base_urls: z.array(z.string()).min(1).max(20).describe("`base_url` values from list_picked_media, up to 20."),
       album_id: z.string().optional().describe("Save them straight into this album."),
       ...confirmArg,
+      ...accountArg,
     },
     risk: "destructive",
     summary: (args) => `copy ${args.base_urls.length} picked item(s) into the library as new uploads`,
@@ -175,6 +178,7 @@ export const uploadTools: AnyToolSpec[] = [
       description: z.string().max(1000).optional().describe("Description applied to every uploaded item."),
       max_mb: z.number().min(1).max(200).optional().describe("Skip any file larger than this, in MB. Default 100."),
       ...confirmArg,
+      ...accountArg,
     },
     risk: "destructive",
     summary: (args) => `create album "${args.title}" and upload ${args.urls.length} file(s) into it`,

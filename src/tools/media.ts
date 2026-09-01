@@ -7,7 +7,7 @@
  */
 
 import { z } from "zod";
-import { defineTool, clamp, pageArgs, type AnyToolSpec } from "./kit.js";
+import { defineTool, clamp, pageArgs, type AnyToolSpec , accountArg } from "./kit.js";
 import { page, shapeItem, URL_NOTE, type RawMediaItem } from "../format/items.js";
 
 /** Google's content categories, as of the current Library API reference. */
@@ -29,6 +29,7 @@ export const mediaTools: AnyToolSpec[] = [
     schema: {
       album_id: z.string().optional().describe("Limit to one album. Omit to list everything this app uploaded."),
       ...pageArgs,
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {
@@ -71,6 +72,7 @@ export const mediaTools: AnyToolSpec[] = [
       favorites_only: z.boolean().optional().describe("Only items the user marked as a favourite."),
       include_archived: z.boolean().optional().describe("Include archived items. Default false."),
       ...pageArgs,
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {
@@ -133,7 +135,7 @@ export const mediaTools: AnyToolSpec[] = [
     title: "List every filter value search_library accepts",
     description:
       "Return the exact content categories, media types and feature filters search_library accepts, plus what the Google Photos API cannot do. Costs no API call and no quota.\n\nRead this before guessing a category name. A wrong one is rejected rather than ignored.",
-    schema: {},
+    schema: { ...accountArg },
     risk: "read",
     handler: async () => ({
       content_categories: CONTENT_CATEGORIES,
@@ -159,7 +161,7 @@ export const mediaTools: AnyToolSpec[] = [
     name: "get_media_item",
     title: "Get one media item",
     description: `Fetch a single media item by id, with its dimensions, creation time and description. ${APP_CREATED_NOTE}`,
-    schema: { media_item_id: z.string().describe("The media item id.") },
+    schema: { media_item_id: z.string().describe("The media item id."), ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
       const item = await ctx.client.request<RawMediaItem>(
@@ -174,7 +176,7 @@ export const mediaTools: AnyToolSpec[] = [
     name: "get_media_items",
     title: "Get several media items at once",
     description: `Fetch up to 50 media items by id in one call. Prefer this over repeated get_media_item: it is one request against the daily quota rather than fifty. ${APP_CREATED_NOTE}\n\nIds that cannot be read come back in \`failed\` with a reason, rather than failing the whole call.`,
-    schema: { media_item_ids: z.array(z.string()).min(1).max(50).describe("Media item ids, up to 50.") },
+    schema: { media_item_ids: z.array(z.string()).min(1).max(50).describe("Media item ids, up to 50."), ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
       const query = new URLSearchParams();
@@ -202,6 +204,7 @@ export const mediaTools: AnyToolSpec[] = [
     schema: {
       media_item_id: z.string().describe("The media item to update."),
       description: z.string().max(1000).describe("The new description. Empty string clears it."),
+      ...accountArg,
     },
     risk: "write",
     idempotent: true,
@@ -228,6 +231,7 @@ export const mediaTools: AnyToolSpec[] = [
         .optional()
         .describe("Size suffix: 'd' for the original, or 'w2048-h2048' to cap the long edge. Default 'w2048-h2048'."),
       max_mb: z.number().min(1).max(100).optional().describe("Refuse anything larger, in MB. Default 25."),
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {

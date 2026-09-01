@@ -10,7 +10,7 @@
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { buildServer, VERSION } from "./server.js";
-import { loadConfig, isConfigured, missingCredentials } from "./config.js";
+import { loadConfig, isConfigured, missingCredentials, cleanEnv } from "./config.js";
 import { httpOptionsFromEnv, startHttpServer } from "./transport/http.js";
 
 const HELP = `google-photos-mcp ${VERSION}
@@ -42,7 +42,13 @@ https://github.com/navidmoazzez/google-photos-mcp
 
 async function runAuth(): Promise<number> {
   const config = loadConfig();
-  if (!config.clientId || !config.clientSecret) {
+  // Read the client straight from the environment rather than from a
+  // configured account. `auth` runs before any account exists, which is the
+  // whole point of it, so there is nothing in config.accounts to read yet.
+  const clientId = cleanEnv(process.env.GOOGLE_PHOTOS_CLIENT_ID);
+  const clientSecret = cleanEnv(process.env.GOOGLE_PHOTOS_CLIENT_SECRET);
+
+  if (!clientId || !clientSecret) {
     process.stderr.write(
       `Set GOOGLE_PHOTOS_CLIENT_ID and GOOGLE_PHOTOS_CLIENT_SECRET first. Both come from your own Google Cloud project; the README section 3 walks through creating one.\n`,
     );
@@ -53,7 +59,7 @@ async function runAuth(): Promise<number> {
   const redirect = `http://localhost:${config.authPort}`;
 
   try {
-    const tokens = await runAuthFlow(config.clientId, config.clientSecret, config.authPort, (url) => {
+    const tokens = await runAuthFlow(clientId, clientSecret, config.authPort, (url) => {
       process.stdout.write(
         `\nOpen this in a browser and sign in as the Google account whose photos you want to reach:\n\n${url}\n\nWaiting for the redirect on ${redirect} ...\n`,
       );

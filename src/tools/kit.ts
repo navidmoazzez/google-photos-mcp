@@ -9,12 +9,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z, type ZodRawShape } from "zod";
 import type { PhotosClient } from "../api/client.js";
+import type { ClientPool } from "../api/pool.js";
 import { AuthError, PhotosError, WriteBlockedError } from "../api/errors.js";
-import type { Config } from "../config.js";
+import { selectAccount, type Account, type Config } from "../config.js";
 import { annotationsFor, type Risk, type WriteGuard } from "../safety.js";
 
 export type ToolContext = {
+  /** Already bound to the account this call names, or the default one. */
   client: PhotosClient;
+  account: Account;
   config: Config;
   guard: WriteGuard;
 };
@@ -43,6 +46,16 @@ export function fail(error: unknown): ToolResult {
       : { error: (error as Error)?.message ?? String(error) };
   return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }], isError: true };
 }
+
+/** The optional argument that picks an account, on every account-scoped tool. */
+export const accountArg = {
+  account: z
+    .string()
+    .optional()
+    .describe(
+      "Which connected Google account to act as, by the name it was configured under (or its email). Defaults to the first one. Call list_accounts to see them.",
+    ),
+};
 
 /** The confirmation argument required by every irreversible tool. */
 export const confirmArg = {
@@ -101,7 +114,7 @@ export type AnyToolSpec = Omit<ToolSpec<ZodRawShape>, "handler" | "summary"> & {
 
 export function register(
   server: McpServer,
-  contextFor: () => ToolContext,
+  contextFor: (accountHint?: string) => ToolContext,
   spec: AnyToolSpec,
 ): void {
   server.registerTool(
@@ -121,7 +134,7 @@ export function register(
     // rather than in every tool definition.
     (async (args: Record<string, unknown>) => {
       try {
-        const ctx = contextFor();
+        const ctx = contextFor((args as { account?: string }).account);
         if (spec.risk !== "read") {
           const summary = spec.summary?.(args as never) ?? spec.name;
           const confirm = (args as { confirm?: boolean }).confirm;
@@ -135,8 +148,30 @@ export function register(
   );
 }
 
-export function makeContext(client: PhotosClient, config: Config, guard: WriteGuard): ToolContext {
-  return { client, config, guard };
+/**
+ * Resolved lazily, on first access.
+ *
+ * describe_filter_capabilities and quota_status answer without touching the
+ * API, and they have to keep working when no account is configured at all.
+ * Resolving eagerly would make them throw "no account configured", which is
+ * both wrong and the least helpful moment to say it.
+ */
+export function makeContext(
+  pool: ClientPool,
+  hint: string | undefined,
+  config: Config,
+  guard: WriteGuard,
+): ToolContext {
+  return {
+    get client(): PhotosClient {
+      return pool.for(hint);
+    },
+    get account(): Account {
+      return selectAccount(config, hint);
+    },
+    config,
+    guard,
+  };
 }
 
 /** Clamp a caller-supplied limit into a range the API will accept. */

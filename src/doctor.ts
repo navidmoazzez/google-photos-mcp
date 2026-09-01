@@ -10,7 +10,7 @@
 
 import { buildServer } from "./server.js";
 import { loadConfig, isConfigured, missingCredentials, SCOPES } from "./config.js";
-import { PhotosClient } from "./api/client.js";
+import { ClientPool } from "./api/pool.js";
 
 const ok = (msg: string): void => { process.stdout.write(`  ok    ${msg}\n`); };
 const bad = (msg: string): void => { process.stdout.write(`  FAIL  ${msg}\n`); };
@@ -32,7 +32,8 @@ export async function runDoctor(): Promise<number> {
   ok("All three credentials are set");
 
   // 2. The refresh token actually mints an access token.
-  const client = new PhotosClient(config);
+  const pool = new ClientPool(config);
+  const client = pool.for();
   let token: string;
   try {
     token = await client.accessToken();

@@ -8,7 +8,7 @@
  */
 
 import { z } from "zod";
-import { defineTool, type AnyToolSpec } from "./kit.js";
+import { defineTool, accountArg, type AnyToolSpec } from "./kit.js";
 import { SCOPES, isConfigured, missingCredentials } from "../config.js";
 
 type TokenInfo = {
@@ -20,11 +20,32 @@ type TokenInfo = {
 
 export const metaTools: AnyToolSpec[] = [
   defineTool({
+    name: "list_accounts",
+    title: "List the connected Google accounts",
+    description:
+      "Show every Google account this server can act as, and which one acts when a tool names none.\n\nPass one of these names as `account` on any tool to act as that library instead of the default. Costs no API call.",
+    schema: {},
+    risk: "read",
+    handler: async (_args, ctx) => ({
+      count: ctx.config.accounts.length,
+      default: ctx.config.accounts.length > 0 ? ctx.account.name : null,
+      accounts: ctx.config.accounts.map((a) => ({
+        name: a.name,
+        email: a.email ?? null,
+        configured: Boolean(a.clientId && a.clientSecret && a.refreshToken),
+      })),
+      ...(ctx.config.accounts.length === 0
+        ? { note: "Nothing configured. Set GOOGLE_PHOTOS_CLIENT_ID, GOOGLE_PHOTOS_CLIENT_SECRET and GOOGLE_PHOTOS_REFRESH_TOKEN, or GOOGLE_PHOTOS_ACCOUNTS for several." }
+        : {}),
+    }),
+  }),
+
+  defineTool({
     name: "auth_status",
     title: "Check the Google Photos connection",
     description:
       "Report whether the server can reach Google Photos, which account it acts as, and which scopes the grant actually carries.\n\nCall this first when anything returns a permission error. A missing scope and a revoked token produce similar-looking failures and are fixed differently.",
-    schema: {},
+    schema: { ...accountArg },
     risk: "read",
     handler: async (_args, ctx) => {
       if (!isConfigured(ctx.config)) {
@@ -47,6 +68,7 @@ export const metaTools: AnyToolSpec[] = [
 
       return {
         connected: response.ok,
+        account_name: ctx.account.name,
         account: info.email,
         access_token_expires_in_seconds: info.expires_in,
         granted_scopes: granted,
@@ -84,6 +106,7 @@ export const metaTools: AnyToolSpec[] = [
       method: z.enum(["GET", "POST", "PATCH", "DELETE"]).optional().describe("HTTP method. Default GET."),
       body: z.record(z.unknown()).optional().describe("JSON body, for POST and PATCH."),
       query: z.record(z.string()).optional().describe("Query string parameters."),
+      ...accountArg,
     },
     risk: "write",
     summary: (args) => `${args.method ?? "GET"} ${args.api}${args.path}`,

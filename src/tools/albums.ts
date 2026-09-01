@@ -9,7 +9,7 @@
  */
 
 import { z } from "zod";
-import { defineTool, clamp, confirmArg, pageArgs, type AnyToolSpec } from "./kit.js";
+import { defineTool, clamp, confirmArg, pageArgs, type AnyToolSpec , accountArg } from "./kit.js";
 import { page, shapeAlbum, type RawAlbum } from "../format/items.js";
 
 const APP_CREATED_NOTE =
@@ -21,7 +21,7 @@ export const albumTools: AnyToolSpec[] = [
     title: "Create an album",
     description:
       "Create a new, empty album in the user's Google Photos. It is private, and it belongs to this app, which is what makes it editable later. Add items with add_to_album or by passing album_id when uploading.",
-    schema: { title: z.string().min(1).max(500).describe("The album title as the user will see it.") },
+    schema: { title: z.string().min(1).max(500).describe("The album title as the user will see it."), ...accountArg },
     risk: "write",
     summary: (args) => `create album "${args.title}"`,
     handler: async (args, ctx) => {
@@ -37,7 +37,7 @@ export const albumTools: AnyToolSpec[] = [
     name: "list_albums",
     title: "List albums",
     description: `List the albums this app created, newest first. ${APP_CREATED_NOTE}\n\nPass next_page_token from a previous result to continue; a library with many albums will not fit in one page.`,
-    schema: { ...pageArgs },
+    schema: { ...pageArgs, ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
       const data = await ctx.client.request<{ albums?: RawAlbum[]; nextPageToken?: string }>(
@@ -58,7 +58,7 @@ export const albumTools: AnyToolSpec[] = [
     name: "get_album",
     title: "Get one album",
     description: `Fetch a single album by id, including its item count, cover photo and sharing state.\n\nA 404 here usually means the album exists but was not created by this app, rather than that the id is wrong. ${APP_CREATED_NOTE}`,
-    schema: { album_id: z.string().describe("The album id, from list_albums or create_album.") },
+    schema: { album_id: z.string().describe("The album id, from list_albums or create_album."), ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
       const album = await ctx.client.request<RawAlbum>(
@@ -81,6 +81,7 @@ export const albumTools: AnyToolSpec[] = [
         .string()
         .optional()
         .describe("A media item already in this album, to use as the cover. Omit to leave it unchanged."),
+      ...accountArg,
     },
     risk: "write",
     idempotent: true,
@@ -123,6 +124,7 @@ export const albumTools: AnyToolSpec[] = [
         .describe("Let people who open the link add their own photos to the album. Default false."),
       commentable: z.boolean().optional().describe("Let people comment on items. Default true."),
       ...confirmArg,
+      ...accountArg,
     },
     risk: "destructive",
     public: true,
@@ -157,7 +159,7 @@ export const albumTools: AnyToolSpec[] = [
     title: "Stop sharing an album",
     description:
       "Revoke an album's share link and make it private again. Anyone who already opened the link loses access, but anything they saved or downloaded stays with them.",
-    schema: { album_id: z.string().describe("The album to stop sharing.") },
+    schema: { album_id: z.string().describe("The album to stop sharing."), ...accountArg },
     risk: "write",
     idempotent: true,
     summary: (args) => `revoke sharing on album ${args.album_id}`,
@@ -174,7 +176,7 @@ export const albumTools: AnyToolSpec[] = [
     name: "list_shared_albums",
     title: "List shared albums",
     description: `List the shared albums this app created, with their share links. ${APP_CREATED_NOTE}`,
-    schema: { ...pageArgs },
+    schema: { ...pageArgs, ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
       const data = await ctx.client.request<{ sharedAlbums?: RawAlbum[]; nextPageToken?: string }>(
@@ -194,6 +196,7 @@ export const albumTools: AnyToolSpec[] = [
     schema: {
       album_id: z.string().describe("The album to add to."),
       media_item_ids: z.array(z.string()).min(1).max(50).describe("Media item ids, up to 50."),
+      ...accountArg,
     },
     risk: "write",
     summary: (args) => `add ${args.media_item_ids.length} item(s) to album ${args.album_id}`,
@@ -214,6 +217,7 @@ export const albumTools: AnyToolSpec[] = [
     schema: {
       album_id: z.string().describe("The album to remove from."),
       media_item_ids: z.array(z.string()).min(1).max(50).describe("Media item ids, up to 50."),
+      ...accountArg,
     },
     risk: "write",
     summary: (args) => `remove ${args.media_item_ids.length} item(s) from album ${args.album_id}`,
@@ -248,6 +252,7 @@ export const albumTools: AnyToolSpec[] = [
         .string()
         .optional()
         .describe("Place the enrichment after this item. Omit to put it at the end of the album."),
+      ...accountArg,
     },
     risk: "write",
     summary: (args) => `add ${args.type} enrichment to album ${args.album_id}`,

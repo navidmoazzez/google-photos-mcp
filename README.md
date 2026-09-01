@@ -12,7 +12,15 @@
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 
-Let an AI agent work with your Google Photos: pick photos from your library, upload new ones, and build albums.
+Google Photos MCP connects your photo library to Claude, Cursor, and any other AI
+agent. It opens a picker so you choose what the agent sees, it uploads photos and
+videos, it builds and shares albums, and it adds captions, places and maps between
+the pictures.
+
+There are 29 tools, and the picker is the point of all of them. Google removed
+whole-library access for every third-party app in April 2025, so asking you to choose
+is the only honest way in, and this server is built around that rather than
+pretending otherwise. You can connect as many Google accounts as you need.
 
 ```
 You:    I want to put my Iceland shots into a shared album.
@@ -39,7 +47,7 @@ Built by [Navid Moazzez](https://navid.me).
 | 3 | [Setup](#3-setup-) | Every click, start to finish |
 | 4 | [Connect your client](#4-connect-your-client-) | Nine clients, copy and paste |
 | 5 | [Check it worked](#5-check-it-worked-) | One command |
-| 6 | [Tools](#6-tools-) | All 28 |
+| 6 | [Tools](#6-tools-) | All 29 |
 | 7 | [Notes and gotchas](#7-notes-and-gotchas-) | What the API will not do |
 | 8 | [Troubleshooting](#8-troubleshooting-) | Symptom to cause |
 | 9 | [FAQ](#9-faq-) | Twelve questions, including what an MCP server is |
@@ -359,6 +367,35 @@ GOOGLE_PHOTOS_REFRESH_TOKEN = "your-refresh-token"
 
 `~/.gemini/settings.json`, same JSON as Claude Desktop, key `mcpServers`.
 
+### More than one Google account
+
+Swap the three single-account variables for `GOOGLE_PHOTOS_ACCOUNTS`, a JSON
+array. Each account carries its own client id and secret, because a refresh
+token only works with the OAuth client that minted it. Two Google accounts
+authorised through the same Cloud project can reuse the same pair.
+
+```json
+{
+  "mcpServers": {
+    "google-photos": {
+      "command": "npx",
+      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
+      "env": {
+        "GOOGLE_PHOTOS_ACCOUNTS": "[{\"name\":\"personal\",\"client_id\":\"...\",\"client_secret\":\"...\",\"refresh_token\":\"...\"},{\"name\":\"brand\",\"client_id\":\"...\",\"client_secret\":\"...\",\"refresh_token\":\"...\"}]",
+        "GOOGLE_PHOTOS_DEFAULT_ACCOUNT": "personal"
+      }
+    }
+  }
+}
+```
+
+Run `auth` once per account, signing in as a different Google account each time.
+Then pass `account: "brand"` on any tool, or leave it off and the default acts.
+`list_accounts` shows what is connected.
+
+An exact name wins over a prefix, so `personal` and `personal-archive` stay
+distinct rather than resolving to whichever came first.
+
 ### Everything else
 
 Zed, Cline, Continue and anything else that speaks MCP over stdio take the same
@@ -393,7 +430,7 @@ actually landed in the grant, and one live API call.
 
 ## 6. Tools 🛠️
 
-28 tools. Read-only mode leaves 15.
+29 tools. Read-only mode leaves 16.
 
 ### Picking from your library
 
@@ -447,6 +484,7 @@ human has to actually use the URL before anything is visible.
 
 | Tool | What it does |
 |---|---|
+| `list_accounts` | Every connected Google account, and which one is the default |
 | `auth_status` | Which account, which scopes, and what is missing |
 | `quota_status` | How much of the daily budget is left |
 | `raw` | Call an endpoint this server does not wrap |
@@ -521,24 +559,29 @@ anything read back as data, never as instructions.
 ## 9. FAQ ❓
 
 **What is an MCP server?**
+
 Model Context Protocol is an open standard that lets an AI assistant use outside
 tools. An MCP server exposes a set of tools, and any MCP client (Claude Code,
 Claude Desktop, Cursor, Windsurf, VS Code, Codex CLI, Gemini CLI) can call them.
 This one exposes Google Photos.
 
 **Can it search all my photos?**
+
 No, and nothing can. Google removed that for third-party apps on 1 April 2025.
 It can show you a picker, and you choose what it sees.
 
 **Can it delete a photo?**
+
 No. Google exposes no delete endpoint to any app. That is also why uploading
 asks for confirmation.
 
 **Does it upload my photos anywhere?**
+
 No. It runs on your machine and talks directly to Google. There is no service in
 the middle. Photo bytes are held in memory for one call and never cached.
 
 **Is my refresh token safe?**
+
 It is scoped to four permissions and no more: read what you pick, upload, read
 back what it uploaded, edit what it created. It cannot read your existing photos
 and cannot reach any other Google service. It still reaches a real photo
@@ -546,32 +589,39 @@ library, so treat it as a password. Revoke at
 [myaccount.google.com/permissions](https://myaccount.google.com/permissions).
 
 **Why do I have to create my own Google Cloud project?**
+
 Google Photos has no API keys and does not support service accounts. A user
 OAuth grant is the only way in, and a grant needs a client. Setup is once.
 
 **Why did it stop working after a week?**
+
 The OAuth consent screen is in Testing, where Google expires authorisations
 after seven days. Set it to In production.
 
 **Do I need Google to verify my app?**
+
 Not for your own use. You click past an "unverified app" warning. Verification
 matters only when other people will use your client, and Google Photos scopes
 need a separate review on top of the usual one.
 
 **Can I run it for more than one Google account?**
+
 One account per server instance. Run a second instance with a different refresh
 token under a different name in your client config.
 
 **Can I use it from claude.ai on the web?**
+
 Yes, but claude.ai runs connectors from Anthropic's cloud, so it needs the HTTP
 transport hosted somewhere with a public HTTPS URL. See
 [section 4](#4-connect-your-client-).
 
 **How do I stop an agent changing anything?**
+
 `GOOGLE_PHOTOS_READ_ONLY=1`. The write tools are not registered at all, so a
-model cannot call what it cannot see.
+model cannot call what it cannot see, and the list drops from 29 tools to 16.
 
 **How do I know it is actually working?**
+
 `doctor`. It tests credentials, scopes and a live API call, and names the first
 real problem rather than leaving you to guess.
 

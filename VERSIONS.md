@@ -14,7 +14,7 @@
 
 First release.
 
-28 tools across both halves of the Google Photos API: the Picker API for
+29 tools across both halves of the Google Photos API: the Picker API for
 reaching the user's whole library through them, and the Library API for media
 this server uploaded.
 
@@ -28,10 +28,11 @@ descriptions, the `google-photos://capabilities` resource and
 - Albums: create, list, get, update, share, unshare, list shared, add and remove items, enrichments
 - Media: list, search, get one, get many, set description, download
 - Uploads: from URL, from a local file, from a picker selection, or album and contents in one call
-- Connection: `auth_status`, `quota_status`, and a `raw` escape hatch
+- Connection: `list_accounts`, `auth_status`, `quota_status`, and a `raw` escape hatch
+- Several Google accounts at once via `GOOGLE_PHOTOS_ACCOUNTS`, with `account` on every scoped tool and an exact name beating a prefix so two similar names cannot resolve to the wrong library
 - Both daily quotas tracked locally (10,000 API requests, 75,000 media-byte requests, midnight UTC) so the ceiling refuses before the call rather than returning a 429 a model reads as transient
 - `google-photos-mcp auth` runs the one-time sign-in and prints a refresh token
 - `google-photos-mcp doctor` checks credentials, scopes and a live API call, in the order they fail
 - stdio and streamable HTTP transports
-- `GOOGLE_PHOTOS_READ_ONLY=1` drops the tool list to the 15 reads
+- `GOOGLE_PHOTOS_READ_ONLY=1` drops the tool list to the 16 reads
 - Uploading and sharing require `confirm: true`, because Google exposes no delete endpoint and a share link cannot be recalled

@@ -12,7 +12,7 @@
 
 import { createServer } from "node:http";
 import { AuthError } from "./errors.js";
-import { SCOPES, type Config } from "../config.js";
+import { SCOPES, type Account } from "../config.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -35,13 +35,13 @@ type TokenResponse = {
  * request that started while the token was still technically valid.
  */
 export class TokenStore {
-  private readonly config: Config;
+  private readonly account: Account;
   private token = "";
   private expiresAt = 0;
   private inFlight: Promise<string> | null = null;
 
-  constructor(config: Config) {
-    this.config = config;
+  constructor(account: Account) {
+    this.account = account;
   }
 
   async accessToken(): Promise<string> {
@@ -58,10 +58,10 @@ export class TokenStore {
   }
 
   private async refresh(): Promise<string> {
-    const { clientId, clientSecret, refreshToken } = this.config;
+    const { clientId, clientSecret, refreshToken, name } = this.account;
     if (!clientId || !clientSecret || !refreshToken) {
       throw new AuthError(
-        "Not configured. Set GOOGLE_PHOTOS_CLIENT_ID, GOOGLE_PHOTOS_CLIENT_SECRET and GOOGLE_PHOTOS_REFRESH_TOKEN. Run `google-photos-mcp auth` to obtain the refresh token, or `google-photos-mcp doctor` to see what is missing.",
+        `Account "${name}" is not fully configured. It needs a client id, a client secret and a refresh token. Run \`google-photos-mcp auth\` to obtain one, or \`google-photos-mcp doctor\` to see what is missing.`,
       );
     }
 
@@ -81,7 +81,7 @@ export class TokenStore {
     if (!response.ok || !data.access_token) {
       const detail = data.error_description || data.error || `HTTP ${response.status}`;
       throw new AuthError(
-        `Could not refresh the access token (${detail}). ` +
+        `Could not refresh the access token for account "${name}" (${detail}). ` +
           (data.error === "invalid_grant"
             ? "invalid_grant almost always means the refresh token was revoked or expired. An OAuth consent screen still in Testing mode expires refresh tokens after 7 days; publish it, or re-run `google-photos-mcp auth`."
             : data.error === "invalid_client"

@@ -13,7 +13,7 @@
  */
 
 import { z } from "zod";
-import { defineTool, clamp, pageArgs, type AnyToolSpec } from "./kit.js";
+import { defineTool, clamp, pageArgs, type AnyToolSpec , accountArg } from "./kit.js";
 import { page, shapeItem, URL_NOTE, type RawMediaItem } from "../format/items.js";
 import { PhotosError } from "../api/errors.js";
 
@@ -61,7 +61,7 @@ export const pickerTools: AnyToolSpec[] = [
     title: "Start a photo picker session",
     description:
       "Open a Google Photos picker so the user can choose photos and videos from their ENTIRE library. This is the only way to reach media this app did not upload itself; the Library API cannot see anything else.\n\nReturns a `picker_uri`. Give that URL to the user and stop. They open it, select items in Google Photos, and finish. Then call check_pick_session until `ready` is true, and list_picked_media to see what they chose.\n\nDo not call list_picked_media straight after this. Nothing has been picked yet and the empty result does not mean the library is empty.",
-    schema: {},
+    schema: { ...accountArg },
     risk: "read",
     handler: async (_args, ctx) => {
       const session = await ctx.client.request<Session>("picker", "/sessions", { method: "POST", body: {} });
@@ -89,6 +89,7 @@ export const pickerTools: AnyToolSpec[] = [
       "Poll a picker session started by start_pick_session. `ready` is true once the user has confirmed a selection.\n\nRespect the poll_interval_seconds from start_pick_session rather than polling in a tight loop. If it is still false after a few minutes, the user has probably not opened the link yet; ask them rather than polling forever.",
     schema: {
       session_id: z.string().describe("The session_id returned by start_pick_session."),
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {
@@ -112,6 +113,7 @@ export const pickerTools: AnyToolSpec[] = [
     schema: {
       session_id: z.string().describe("The session_id returned by start_pick_session."),
       ...pageArgs,
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {
@@ -150,6 +152,7 @@ export const pickerTools: AnyToolSpec[] = [
           "Size suffix. 'd' for the original file, or 'w2048-h2048' to cap the long edge. Defaults to 'w2048-h2048', which is plenty for viewing and far smaller than an original.",
         ),
       max_mb: z.number().min(1).max(100).optional().describe("Refuse anything larger, in MB. Default 25."),
+      ...accountArg,
     },
     risk: "read",
     handler: async (args, ctx) => {

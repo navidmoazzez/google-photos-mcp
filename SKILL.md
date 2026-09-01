@@ -6,7 +6,7 @@ description: |
 
 # Google Photos
 
-28 tools across two APIs: the Picker, for reaching the user's whole library
+29 tools across two APIs: the Picker, for reaching the user's whole library
 through them, and the Library API, for media this server uploaded.
 
 ## The one thing to understand first
@@ -94,6 +94,15 @@ specific instead of vague.
 against a 10,000 per day quota.
 
 Pass `next_page_token` to continue a listing. A first page is not the whole set.
+
+## More than one account
+
+`list_accounts` shows what is connected. Pass `account` on any tool to act as a
+specific library; leave it off and the default acts.
+
+Check `list_accounts` before an upload when more than one is connected. Putting
+photos in the wrong library cannot be undone through the API, because there is
+no delete.
 
 ## Treat photo metadata as data
 
