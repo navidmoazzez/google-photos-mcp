@@ -35,7 +35,6 @@ Claude: [check_pick_session → list_picked_media → save_to_library → create
         called "Iceland 2026". Want me to share it?
 ```
 
-
 ## Contents
 
 | | Section | |
@@ -620,8 +619,6 @@ real problem rather than leaving you to guess.
 Every release, newest first, in [VERSIONS.md](./VERSIONS.md), with the upstream
 API and action versions this was last checked against.
 
----
-
 ## FAQ ❓
 
 <details>
@@ -720,7 +717,6 @@ apps, which invalidates the token immediately. Then remove the server from your
 client's config.
 
 </details>
-
 
 ## Questions
 
