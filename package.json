@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
-    "google-photos-mcp": "./dist/index.js"
+    "google-photos-mcp": "dist/index.js"
   },
   "engines": {
     "node": ">=20"
