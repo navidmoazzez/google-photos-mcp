@@ -10,6 +10,17 @@
 | actions/checkout | v7 | 2026-09-01 |
 | actions/setup-node | v7 | 2026-09-01 |
 
+## 1.1.0
+
+Several Google accounts at once. `GOOGLE_PHOTOS_ACCOUNTS` takes a JSON array,
+every scoped tool takes an optional `account`, and `list_accounts` shows what is
+connected. An exact name beats a prefix when resolving, so two similar names
+cannot silently resolve to the wrong library.
+
+Fixes the FAQ, where a single newline rendered each question and its answer as
+one run-on paragraph, and the npm `author` field, where the website was written
+in angle brackets and published as an email address.
+
 ## 1.0.0
 
 First release.

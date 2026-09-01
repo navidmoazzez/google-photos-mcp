@@ -177,7 +177,7 @@ export function loadConfig(): Config {
     allowDestructive: envFlag("GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE", true),
     requestTimeoutMs: envInt("GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS", 30_000),
     maxRetries: envInt("GOOGLE_PHOTOS_MAX_RETRIES", 2),
-    userAgent: `google-photos-mcp/1.0.0 (+https://github.com/navidmoazzez/google-photos-mcp)`,
+    userAgent: `google-photos-mcp/1.1.0 (+https://github.com/navidmoazzez/google-photos-mcp)`,
     auditPath: process.env.GOOGLE_PHOTOS_AUDIT_LOG?.trim() || undefined,
     authPort: envInt("GOOGLE_PHOTOS_AUTH_PORT", DEFAULT_AUTH_PORT),
   };

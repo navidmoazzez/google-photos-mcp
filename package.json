@@ -1,6 +1,6 @@
 {
   "name": "@thenavidm/google-photos-mcp",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Google Photos MCP server for Claude Code and AI agents. Photo picker, uploads, albums, sharing, enrichments, descriptions, app-created media search, and multiple Google accounts.",
   "type": "module",
   "main": "./dist/index.js",

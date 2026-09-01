@@ -14,7 +14,7 @@ import { WriteGuard } from "./safety.js";
 import { ALL_TOOLS } from "./tools/index.js";
 import { makeContext, register } from "./tools/kit.js";
 
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";
 
 export const INSTRUCTIONS = `Tools for Google Photos: picking photos from the user's library, uploading, and organising albums.
 
