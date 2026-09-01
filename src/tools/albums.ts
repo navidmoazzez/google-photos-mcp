@@ -45,7 +45,7 @@ export const albumTools: AnyToolSpec[] = [
         "/albums",
         {
           // excludeNonAppCreatedData is the default under an appcreateddata
-          // scope, but setting it explicitly means the behaviour does not
+          // scope, but setting it explicitly means the behavior does not
           // change if a broader scope is ever added to the grant.
           query: { pageSize: clamp(args.limit, 25, 50), pageToken: args.page_token, excludeNonAppCreatedData: "true" },
         },
