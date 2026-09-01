@@ -1,4 +1,3 @@
 # CLAUDE.md
 
-See [AGENTS.md](AGENTS.md). It is the one document for agents working on this
-repo, and this file exists only so it is found under either name.
+See [AGENTS.md](./AGENTS.md). One document, so the two cannot drift.

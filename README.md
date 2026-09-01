@@ -630,6 +630,108 @@ real problem rather than leaving you to guess.
 Every release, newest first, in [VERSIONS.md](./VERSIONS.md), with the upstream
 API and action versions this was last checked against.
 
+---
+
+## FAQ ❓
+
+<details>
+<summary><b>What is an MCP server?</b></summary>
+
+An MCP server is a standard way to give an AI assistant real access to a tool,
+so it can act rather than guess. You install it once, your assistant gains the
+tools, and it works in Claude, Cursor, ChatGPT and anything else that speaks the
+protocol.
+
+</details>
+
+<details>
+<summary><b>Can it see my whole photo library?</b></summary>
+
+It cannot, and this is the most important thing to understand about it. Google
+removed the broad library scopes from new grants on 1 April 2025. An app created
+today can read only what it uploaded itself, plus whatever you hand it through
+Google's own picker.
+
+Anything promising full library access on a new project is describing a world
+that no longer exists.
+
+</details>
+
+<details>
+<summary><b>What is the picker, and why do I have to use it?</b></summary>
+
+The picker is Google's own selection screen. You choose the photos, and only
+those become visible to the server. It exists because Google decided that
+reading someone's entire library should be the user's explicit choice each time
+rather than a permission granted once.
+
+In practice you pick a set, the server reads it, and nothing else is exposed.
+
+</details>
+
+<details>
+<summary><b>What permissions does it ask for?</b></summary>
+
+It asks for four narrow scopes: read what you picked, upload new media and
+create albums, read back only what this app created, and edit descriptions and
+album membership for that same app-created data. None of them grant access to
+photos it did not upload or you did not pick.
+
+</details>
+
+<details>
+<summary><b>Is my data sent anywhere? Who can see it?</b></summary>
+
+Nothing leaves your machine except calls to Google. There is no backend here, no
+account to create and no telemetry. Your credential sits in your client's config
+or your local data directory.
+
+</details>
+
+<details>
+<summary><b>Can it delete my photos?</b></summary>
+
+It cannot delete anything. Google's API exposes no delete for library media, so
+there is nothing to call. The strongest thing it does is edit descriptions and
+album membership for items it created itself.
+
+</details>
+
+<details>
+<summary><b>Can it post without me asking?</b></summary>
+
+It uploads and creates albums when you ask it to. Setting
+`GOOGLE_PHOTOS_READ_ONLY=1` removes every write tool from the list, so the model
+cannot see or call them.
+
+</details>
+
+<details>
+<summary><b>Does it cost anything?</b></summary>
+
+It costs nothing. The server is MIT licensed and the Google Photos API is free.
+Uploads count against your normal Google storage, the same as any other upload.
+
+</details>
+
+<details>
+<summary><b>Does it work with ChatGPT and Cursor, or only Claude?</b></summary>
+
+It works with any MCP client. Claude Code, Claude Desktop, Cursor, Windsurf, VS
+Code, Codex CLI and Gemini CLI all run it the same way.
+
+</details>
+
+<details>
+<summary><b>How do I disconnect it?</b></summary>
+
+Remove the app's access at myaccount.google.com under Security, then Third-party
+apps, which invalidates the token immediately. Then remove the server from your
+client's config.
+
+</details>
+
+
 ## Questions
 
 Run into a problem or have a question? [Open an issue](https://github.com/navidmoazzez/google-photos-mcp/issues) and I will help.
