@@ -21,7 +21,7 @@ Google removed whole-library access for every third-party app in April 2025. Ask
 
 29 tools. Connect as many Google accounts as you need.
 
-Built and maintained by [Navid Moazzez](https://navid.me).
+Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp).
 
 ```
 You:    I want to put my Iceland shots into a shared album.
@@ -734,7 +734,7 @@ Navid Moazzez is a leading AI business strategist, and the host of the AI Creato
 
 **Links**
 
-- Personal website: [navid.me](https://navid.me)
+- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp)
 - YouTube: [@thenavidm](https://youtube.com/@thenavidm?sub_confirmation=1) and [@thenavidai](https://youtube.com/@thenavidai?sub_confirmation=1)
 - X: [@thenavidm](https://x.com/thenavidm)
 - Instagram: [@thenavidm](https://instagram.com/thenavidm)
@@ -759,4 +759,4 @@ Not affiliated with, endorsed by, or connected to Google LLC.
 
 ---
 
-© 2026 [NM Media](https://navid.media). Made with ❤️ by [Navid Moazzez](https://navid.me).
+© 2026 [NM Media](https://navid.media?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp). Made with ❤️ by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp).
