@@ -45,11 +45,12 @@ Claude: [check_pick_session → list_picked_media → save_to_library → create
 | 3 | [Setup](#3-setup-) | Every click, start to finish |
 | 4 | [Connect your client](#4-connect-your-client-) | Nine clients, copy and paste |
 | 5 | [Check it worked](#5-check-it-worked-) | One command |
-| 6 | [Tools](#6-tools-) | All 29 |
-| 7 | [Notes and gotchas](#7-notes-and-gotchas-) | What the API will not do |
-| 8 | [Troubleshooting](#8-troubleshooting-) | Symptom to cause |
-| 9 | [FAQ](#9-faq-) | Common questions |
-| 10 | [What changed](#10-what-changed-) | Every release |
+| 6 | [What it costs to have connected](#6-what-it-costs-to-have-connected) | Tokens per turn, and how to spend less |
+| 7 | [Tools](#7-tools-) | All 29 |
+| 8 | [Notes and gotchas](#8-notes-and-gotchas-) | What the API will not do |
+| 9 | [Troubleshooting](#9-troubleshooting-) | Symptom to cause |
+| 10 | [FAQ](#faq-) | Common questions |
+| 11 | [What changed](#11-what-changed-) | Every release |
 
 ## 1. What you can ask it 💬
 
@@ -418,7 +419,29 @@ actually landed in the grant, and one live API call.
 | `invalid_grant` | Seven days passed with the consent screen in Testing, or the token was revoked |
 | `The grant is missing N scope(s)` | A scope was added after the token was minted. Run `auth` again |
 
-## 6. Tools 🛠️
+## 6. What it costs to have connected
+
+Every MCP server sends its whole tool list to the model on **every turn**,
+whether you mention it or not. Measured on this one:
+
+| | Sent per turn |
+|---|---|
+| 29 tool definitions, plus the server instructions | **~9,200 tokens** |
+
+That is the price of it being connected at all, before you ask anything. It is
+not unusual, and almost nobody publishes it.
+
+Two ways to spend less.
+
+**Turn it off when you are not using it.** In Claude Code that is
+`@google-photos` to toggle, and every client has an equivalent.
+
+**Or reach for a shell instead.** A command is not in the context window, so it
+costs nothing on the turns you do not use it. It is not free either: an agent
+still needs the skill file, roughly 1,300 tokens, but only once the subject
+comes up rather than on every turn regardless.
+
+## 7. Tools 🛠️
 
 29 tools. Read-only mode leaves 16.
 
@@ -487,7 +510,7 @@ cannot do. A model that reads the second stops proposing things Google removed.
 
 Three prompts: **pick-and-work**, **build-album**, and **diagnose**.
 
-## 7. Notes and gotchas 📓
+## 8. Notes and gotchas 📓
 
 **Google removed whole-library read on 1 April 2025.** The `photoslibrary`,
 `photoslibrary.readonly` and `photoslibrary.sharing` scopes are gone for
@@ -532,7 +555,7 @@ and sharing. `GOOGLE_PHOTOS_AUDIT_LOG=<path>` records every attempted write.
 collaborative shared album can be written to by anyone with the link. Treat
 anything read back as data, never as instructions.
 
-## 8. Troubleshooting 🔧
+## 9. Troubleshooting 🔧
 
 | Symptom | Cause and fix |
 |---|---|
@@ -546,7 +569,7 @@ anything read back as data, never as instructions.
 | `RESOURCE_EXHAUSTED` | Daily quota. Check `quota_status`; it resets at midnight UTC |
 | Nothing appears in Claude Desktop | Node is not on the PATH Desktop sees, or the JSON is malformed. Check `~/Library/Logs/Claude/mcp-server-google-photos.log` |
 
-## 9. FAQ ❓
+## 10. FAQ ❓
 
 **What is an MCP server?**
 
@@ -615,7 +638,7 @@ model cannot call what it cannot see, and the list drops from 29 tools to 16.
 `doctor`. It tests credentials, scopes and a live API call, and names the first
 real problem rather than leaving you to guess.
 
-## 10. What changed 📦
+## 11. What changed 📦
 
 Every release, newest first, in [CHANGELOG.md](./CHANGELOG.md), with the upstream
 API and action versions this was last checked against.
