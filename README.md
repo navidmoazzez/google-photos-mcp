@@ -22,19 +22,7 @@ Google removed whole-library access for every third-party app in April 2025. Ask
 
 Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp).
 
-```
-You:    I want to put my Iceland shots into a shared album.
-
-Claude: [start_pick_session]
-        Open this and choose the ones you want:
-        https://photos.google.com/picker/...
-
-You:    Done, picked 24.
-
-Claude: [check_pick_session → list_picked_media → save_to_library → create_album]
-        24 items, all photos, shot 3-11 March. They are in a new album
-        called "Iceland 2026". Want me to share it?
-```
+<img src="https://cdn.navid.media/repos/google-photos-mcp.gif?v=1" alt="Claude Code using the Google Photos MCP server" width="520">
 
 ## Contents
 
