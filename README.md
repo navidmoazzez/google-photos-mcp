@@ -617,7 +617,7 @@ real problem rather than leaving you to guess.
 
 ## 10. What changed 📦
 
-Every release, newest first, in [VERSIONS.md](./VERSIONS.md), with the upstream
+Every release, newest first, in [CHANGELOG.md](./CHANGELOG.md), with the upstream
 API and action versions this was last checked against.
 
 ## FAQ ❓
