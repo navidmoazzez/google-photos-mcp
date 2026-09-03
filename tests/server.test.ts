@@ -153,12 +153,11 @@ describe("tool surface", () => {
     }
   });
 
-  it("marks uploads and sharing as the destructive ones", () => {
+  it("marks the uploads as the destructive ones", () => {
     const destructive = ALL_TOOLS.filter((t) => t.risk === "destructive").map((t) => t.name).sort();
     expect(destructive).toEqual([
       "create_album_with_media",
       "save_to_library",
-      "share_album",
       "upload_file",
       "upload_from_url",
     ]);

@@ -36,7 +36,7 @@ Or, for several Google accounts at once:
 
 Options:
   GOOGLE_PHOTOS_READ_ONLY=1             hide every write from the tool list
-  GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0     keep writes, block uploading and sharing
+  GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0     keep writes, block uploading
   GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS      per-request deadline, default 30000
   GOOGLE_PHOTOS_MAX_RETRIES             retries on 429 and 5xx, default 2
   GOOGLE_PHOTOS_AUDIT_LOG               append-only log of every attempted write
@@ -46,7 +46,7 @@ Options:
 Setting up the Google Cloud project takes about ten minutes and is the only
 fiddly part. The walkthrough is in the README, section 3.
 
-https://github.com/thenavidm/google-photos-mcp
+https://github.com/thenavidm/google-photos-mcp-cli
 `;
 
 async function runAuth(): Promise<number> {

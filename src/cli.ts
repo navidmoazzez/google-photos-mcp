@@ -84,7 +84,11 @@ function kindOf(schema: ZodTypeAny): { kind: FlagKind; choices?: string[]; repea
       // objects is not worth flattening, so it takes JSON.
       const element = unwrap((schema as unknown as { _def: { type: ZodTypeAny } })._def.type).inner;
       const elementKind = (element as { _def: { typeName?: string } })._def.typeName;
-      const scalar = elementKind === "ZodString" || elementKind === "ZodNumber";
+      // An enum element is a word you type, so it belongs with the scalars.
+      // Treating it as JSON meant `--categories LANDSCAPES` was
+      // rejected and you had to write `--categories '"LANDSCAPES"'`.
+      const scalar =
+        elementKind === "ZodString" || elementKind === "ZodNumber" || elementKind === "ZodEnum";
       return { kind: scalar ? "string" : "json", repeatable: true };
     }
     default:
@@ -206,9 +210,20 @@ export function parseArgs(argv: string[], flags: Flag[]): Record<string, unknown
 
 type Format = "text" | "json" | "compact";
 
-/** Exit codes, so a script can branch without parsing the message. */
+/**
+ * Exit codes, so a script can branch without parsing the message.
+ *
+ * A CLI that only ever returns 0 or 1 forces its caller to read prose to find
+ * out whether to retry, re-authenticate, or give up.
+ */
 export const EXIT = {
-  ok: 0, usage: 2, notFound: 3, auth: 4, api: 5, rateLimited: 7, config: 10,
+  ok: 0,
+  usage: 2,
+  notFound: 3,
+  auth: 4,
+  api: 5,
+  rateLimited: 7,
+  config: 10,
 } as const;
 
 /** Map a thrown error onto one of those, from the shape the API gave back. */
@@ -217,28 +232,53 @@ export function exitCodeFor(error: unknown): number {
   const status = e?.status;
   const text = `${e?.reason ?? ""} ${e?.message ?? ""}`.toLowerCase();
   if (status === 429 || /rate ?limit|resource_exhausted|quota/.test(text)) return EXIT.rateLimited;
+  // Config before auth: "no Google Photos account is configured" names a
+  // refresh token, and matching auth first sent someone who had configured
+  // nothing hunting for an expired credential. Only when there is no HTTP
+  // status, so a real 401 from Google still wins.
+  if (
+    !status &&
+    /not configured|no [a-z ]*(account|credential|token|key)s? (is |are )?configured|missing .*env/.test(text)
+  )
+    return EXIT.config;
   if (status === 401 || status === 403 || /auth|credential|token|permission_denied/.test(text)) return EXIT.auth;
   if (status === 404 || /not found|not_found/.test(text)) return EXIT.notFound;
-  if (/no .*account is configured|not configured|missing .*env|config/.test(text)) return EXIT.config;
+  // A write the guard refused is the caller's mistake, not the API's: it is
+  // missing --confirm, or the server is read-only. That is a usage error.
+  if (/will not run without|read-only|is unavailable/.test(text)) return EXIT.usage;
   if (typeof status === "number" && status >= 500) return EXIT.api;
   return EXIT.api;
 }
 
 /**
- * `--select id,mediaItem.filename` keeps only the named fields. Dotted paths
- * descend, arrays are traversed element-wise. This is what makes a long list
- * of media items affordable.
+ * `--select id,items.filename` keeps only the named fields.
+ *
+ * Dotted paths descend; an array is traversed element-wise so one path reaches
+ * every item. This is the flag that makes a 100-item listing affordable to an
+ * agent: the whole point of the CLI surface is that you pay for what you asked
+ * for, and without this you pay for every field the API felt like sending.
  */
 export function selectFields(data: unknown, paths: string[]): unknown {
   if (Array.isArray(data)) return data.map((d) => selectFields(d, paths));
   if (data === null || typeof data !== "object") return data;
-  const out: Record<string, unknown> = {};
+
+  // Paths are grouped by their first segment before recursing. Walking them one
+  // at a time and assigning `out[head]` each time meant the last path won:
+  // `--select items.id,items.filename` returned only the filename, silently.
+  const byHead = new Map<string, string[]>();
   for (const path of paths) {
     const [head, ...rest] = path.split(".");
     if (head === undefined) continue;
+    const group = byHead.get(head) ?? [];
+    if (rest.length) group.push(rest.join("."));
+    byHead.set(head, group);
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [head, rest] of byHead) {
     const value = (data as Record<string, unknown>)[head];
     if (value === undefined) continue;
-    out[head] = rest.length ? selectFields(value, [rest.join(".")]) : value;
+    out[head] = rest.length ? selectFields(value, rest) : value;
   }
   return out;
 }

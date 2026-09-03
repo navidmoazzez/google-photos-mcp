@@ -1,52 +1,108 @@
 <img src="https://cdn.navid.media/connectors/google-photos-icon.png" alt="Google Photos" width="88">
 
-# Google Photos MCP
+# Google Photos MCP Server & CLI
 
-[![Stars](https://img.shields.io/github/stars/thenavidm/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/thenavidm/google-photos-mcp)
-[![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
-[![npm](https://img.shields.io/npm/v/@thenavidm/google-photos-mcp?color=orange&label=npm)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
-[![CI](https://img.shields.io/github/actions/workflow/status/thenavidm/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/thenavidm/google-photos-mcp/actions)
+[![npm](https://img.shields.io/npm/v/@thenavidm%2Fgoogle-photos-mcp-cli?color=orange&label=npm)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp-cli)
+[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/thenavidm/google-photos-mcp-cli/ci.yml?branch=main&label=CI)](https://github.com/thenavidm/google-photos-mcp-cli/actions)
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-thenavidm-0A66C2?logo=linkedin&logoColor=white)](https://linkedin.com/in/thenavidm)
 
-Google Photos MCP server for Claude Code and AI agents. Picker-based reads, uploads, albums, sharing and metadata.
+Google Photos MCP server and CLI for Claude Code and AI agents. 26 tools for the photo picker, uploads, albums, enrichments, descriptions and app-created media.
 
-It opens Google's own picker, so you choose exactly what the agent sees.
+One install gives you both surfaces, the same tools under the same names.
 
-It uploads photos and videos, builds and shares albums, and writes captions.
+It opens Google's own picker, so you choose exactly what the agent sees. It
+uploads photos and videos, builds albums, writes captions, and adds the
+enrichments that make an album read as a story.
 
-Google removed whole-library access for every third-party app in April 2025. Asking you to choose is the only honest way in, so this server is built around the picker rather than pretending otherwise.
+Google removed whole-library read access for every third-party app on 31 March
+2025. Asking you to choose is the only route left, so this is built around the
+picker rather than pretending otherwise.
 
-29 tools. Connect as many Google accounts as you need.
+Connect as many Google accounts as you need.
 
-Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp).
+Built and maintained by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp-cli).
 
 <img src="https://cdn.navid.media/repos/google-photos-mcp.gif?v=1" alt="Claude Code using the Google Photos MCP server" width="520">
 
-## Contents
+## Two ways to use it
 
-| | Section | |
+### Command line
+
+`google-photos-cli` in your terminal, for scripting, cron, pipes, or a quick
+question without opening anything:
+
+```bash
+google-photos-cli                                       # every command, one line each
+google-photos-cli start-pick-session                    # hand yourself a picker URL
+google-photos-cli check-pick-session --session-id abc   # have you finished picking?
+google-photos-cli list-picked-media --session-id abc
+google-photos-cli list-albums --json | jq -r '.items[].title'
+google-photos-cli create-album --title "Q3 Launch"
+google-photos-cli upload-file --path ./shot.jpg --confirm
+google-photos-cli <command> --help                      # what any command takes
+```
+
+`--confirm` is the shell spelling of the confirmation that uploading requires.
+`--json` gives JSON, `--compact` puts it on one line, `--select` keeps only the
+fields you name, and errors are JSON on stderr whichever you pick.
+
+`google-photos-cli schema <command>` prints the exact JSON Schema an MCP client
+receives for that tool, which is how you can check the two surfaces really are
+one thing.
+
+### MCP server, for AI agents
+
+`google-photos-mcp` is what Claude Code, Claude Desktop, Cursor and the rest
+launch. You never run it by hand:
+
+```bash
+claude mcp add google-photos \
+  -e GOOGLE_PHOTOS_CLIENT_ID=your-client-id \
+  -e GOOGLE_PHOTOS_CLIENT_SECRET=your-client-secret \
+  -e GOOGLE_PHOTOS_REFRESH_TOKEN=your-refresh-token \
+  -- npx -y @thenavidm/google-photos-mcp-cli
+```
+
+Then just ask: _"let me pick a few photos, then put them in a new album with a caption between the second and third."_
+
+Every other client is in [section 4](#4-connect-your-client-).
+
+### Which one
+
+| Where you are | What you can reach |
+|---|---|
+| An agent that can run shell commands, like Claude Code or Cursor | Both. The CLI is the cheaper one: it costs nothing until you type it |
+| claude.ai, the Claude Desktop chat tab, or a phone | The server only. There is no shell to run a command in |
+| A terminal, a script, cron or CI | The CLI only. There is no MCP client in a shell |
+
+They are the same program reading the same tool definitions, so anything one
+can do, the other can.
+
+## Contents 📑
+
+| # | Section | What is in it |
 |---|---|---|
 | 1 | [What you can ask it](#1-what-you-can-ask-it-) | Real prompts, not features |
 | 2 | [Quick install](#2-quick-install-) | No account needed |
 | 3 | [Setup](#3-setup-) | Every click, start to finish |
-| 4 | [Connect your client](#4-connect-your-client-) | Nine clients, copy and paste |
+| 4 | [Connect your client](#4-connect-your-client-) | Every client, copy and paste |
 | 5 | [Check it worked](#5-check-it-worked-) | One command |
-| 6 | [What it costs to have connected](#6-what-it-costs-to-have-connected) | Tokens per turn, and how to spend less |
-| 7 | [Tools](#7-tools-) | All 29 |
+| 6 | [Which surface, and what each costs](#6-which-surface-and-what-each-costs) | ~7,600 tokens a turn, or a few hundred |
+| 7 | [Tools](#7-tools-) | All 26, grouped by what they reach |
 | 8 | [Notes and gotchas](#8-notes-and-gotchas-) | What the API will not do |
 | 9 | [Troubleshooting](#9-troubleshooting-) | Symptom to cause |
-| 10 | [FAQ](#faq-) | Common questions |
-| 11 | [What changed](#11-what-changed-) | Every release |
+| 10 | [FAQ](#10-faq-) | The questions people actually ask |
 
 ## 1. What you can ask it 💬
 
 - Let me pick some photos, then tell me what I chose.
-- Put these six product shots in a new album called "Q3 Launch" and give me a link to share.
+- Put these six product shots in a new album called "Q3 Launch".
 - Which of the ones you uploaded are videos, and how long are they?
 - Write a description on everything in the launch album.
-- Stop sharing the Iceland album.
+- Rename the Iceland album and set the third photo as its cover.
 - Save what I just picked into my library so you can organise it later.
 - Upload this to my brand account, not my personal one.
 - Download the third photo I picked and tell me whether it is sharp enough to print.
@@ -63,7 +119,7 @@ nothing outside Google's own app drives it.
 Node 20 or newer. Nothing else.
 
 ```bash
-npx -y @thenavidm/google-photos-mcp --version
+npx -y @thenavidm/google-photos-mcp-cli --version
 ```
 
 That is the whole install. `npx` fetches it on demand, so there is nothing to
@@ -113,7 +169,7 @@ Help me set up the Google Photos MCP server.
    http://localhost:4180 as an authorised redirect URI.
 5. STOP and wait. I will paste you the client ID and client secret.
 6. Then run: GOOGLE_PHOTOS_CLIENT_ID=... GOOGLE_PHOTOS_CLIENT_SECRET=... \
-   npx -y @thenavidm/google-photos-mcp auth
+   npx -y @thenavidm/google-photos-mcp-cli auth
    and tell me to approve it in the browser.
 7. Add all three values to my MCP client config, then run doctor to verify.
 ```
@@ -211,7 +267,7 @@ Save, then copy the **client ID** and **client secret**. The secret is shown onc
 export GOOGLE_PHOTOS_CLIENT_ID="your-client-id"
 export GOOGLE_PHOTOS_CLIENT_SECRET="your-client-secret"
 
-npx -y @thenavidm/google-photos-mcp auth
+npx -y @thenavidm/google-photos-mcp-cli auth
 ```
 
 A browser opens. Sign in as the account whose photos you want, click past the
@@ -242,7 +298,7 @@ claude mcp add google-photos \
   -e GOOGLE_PHOTOS_CLIENT_ID=your-client-id \
   -e GOOGLE_PHOTOS_CLIENT_SECRET=your-client-secret \
   -e GOOGLE_PHOTOS_REFRESH_TOKEN=your-refresh-token \
-  -- npx -y @thenavidm/google-photos-mcp@latest
+  -- npx -y @thenavidm/google-photos-mcp-cli@latest
 ```
 
 `--scope user` makes it available in every project rather than the current one.
@@ -261,7 +317,7 @@ Then run `/mcp` to confirm it is connected. Remove it with
   "mcpServers": {
     "google-photos": {
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
+      "args": ["-y", "@thenavidm/google-photos-mcp-cli@latest"],
       "env": {
         "GOOGLE_PHOTOS_CLIENT_ID": "your-client-id",
         "GOOGLE_PHOTOS_CLIENT_SECRET": "your-client-secret",
@@ -285,7 +341,7 @@ claude.ai runs connectors from Anthropic's cloud, not from your machine, so it
 cannot launch a local command. It needs a public HTTPS URL.
 
 ```bash
-npx -y @thenavidm/google-photos-mcp@latest --http --port 8000
+npx -y @thenavidm/google-photos-mcp-cli@latest --http --port 8000
 ```
 
 Host that somewhere with a public HTTPS URL, then in claude.ai: **Customize**,
@@ -316,7 +372,7 @@ needs a `type`:
     "google-photos": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
+      "args": ["-y", "@thenavidm/google-photos-mcp-cli@latest"],
       "env": {
         "GOOGLE_PHOTOS_CLIENT_ID": "your-client-id",
         "GOOGLE_PHOTOS_CLIENT_SECRET": "your-client-secret",
@@ -334,7 +390,7 @@ needs a `type`:
 ```toml
 [mcp_servers.google-photos]
 command = "npx"
-args = ["-y", "@thenavidm/google-photos-mcp@latest"]
+args = ["-y", "@thenavidm/google-photos-mcp-cli@latest"]
 
 [mcp_servers.google-photos.env]
 GOOGLE_PHOTOS_CLIENT_ID = "your-client-id"
@@ -358,7 +414,7 @@ authorised through the same Cloud project can reuse the same pair.
   "mcpServers": {
     "google-photos": {
       "command": "npx",
-      "args": ["-y", "@thenavidm/google-photos-mcp@latest"],
+      "args": ["-y", "@thenavidm/google-photos-mcp-cli@latest"],
       "env": {
         "GOOGLE_PHOTOS_ACCOUNTS": "[{\"name\":\"personal\",\"client_id\":\"...\",\"client_secret\":\"...\",\"refresh_token\":\"...\"},{\"name\":\"brand\",\"client_id\":\"...\",\"client_secret\":\"...\",\"refresh_token\":\"...\"}]",
         "GOOGLE_PHOTOS_DEFAULT_ACCOUNT": "personal"
@@ -391,32 +447,10 @@ docker run -i --rm \
   google-photos-mcp
 ```
 
-### Every setting
-
-Everything is an environment variable, because a client config is already a
-JSON `env` block and flags would mean editing `args` separately.
-
-| Variable | Default | What it does |
-|---|---|---|
-| `GOOGLE_PHOTOS_CLIENT_ID` | none | OAuth client id, from your own Google Cloud project |
-| `GOOGLE_PHOTOS_CLIENT_SECRET` | none | The matching client secret |
-| `GOOGLE_PHOTOS_REFRESH_TOKEN` | none | From `google-photos-mcp auth` |
-| `GOOGLE_PHOTOS_ACCOUNTS` | none | JSON array, for several Google accounts at once. Replaces the three above |
-| `GOOGLE_PHOTOS_DEFAULT_ACCOUNT` | first configured | Which account acts when a tool names none. Comma-separated, in order of preference |
-| `GOOGLE_PHOTOS_READ_ONLY` | `0` | `1` removes every write from the tool list |
-| `GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE` | `1` | `0` keeps ordinary writes and blocks uploading and sharing |
-| `GOOGLE_PHOTOS_AUDIT_LOG` | off | Path to an append-only JSON-lines record of every attempted write |
-| `GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS` | `30000` | Per-request deadline |
-| `GOOGLE_PHOTOS_MAX_RETRIES` | `2` | Retries on 429 and 5xx, for idempotent verbs only |
-| `GOOGLE_PHOTOS_AUTH_PORT` | `4180` | Loopback port `auth` listens on. Must match a registered redirect URI |
-| `GOOGLE_PHOTOS_HTTP_PORT` | `8787` | Port for `--http` |
-| `GOOGLE_PHOTOS_HTTP_HOST` | `127.0.0.1` | Interface for `--http`. Widen it only if you mean it |
-| `GOOGLE_PHOTOS_HTTP_TOKEN` | none | Bearer token `--http` requires, when set |
-
 ## 5. Check it worked 🩺
 
 ```bash
-npx -y @thenavidm/google-photos-mcp@latest doctor
+npx -y @thenavidm/google-photos-mcp-cli@latest doctor
 ```
 
 `doctor` checks four things in the order they fail and stops at the first real
@@ -429,31 +463,45 @@ actually landed in the grant, and one live API call.
 | `invalid_grant` | Seven days passed with the consent screen in Testing, or the token was revoked |
 | `The grant is missing N scope(s)` | A scope was added after the token was minted. Run `auth` again |
 
-## 6. What it costs to have connected
+## 6. Which surface, and what each costs
 
-Every MCP server sends its whole tool list to the model on **every turn**,
-whether you mention it or not. Measured on this one:
+Both surfaces carry the same 26 tools. They differ in when you pay for them.
 
-| | Sent per turn |
-|---|---|
-| 29 tool definitions, plus the server instructions | **~9,200 tokens** |
+| Question | MCP server | CLI |
+|---|---|---|
+| Loaded every turn | **~7,600 tokens** | nothing |
+| Loaded when Google Photos comes up | nothing more | ~2,600, once |
+| Works on claude.ai and mobile | yes | no, there is no shell there |
+| Works in a script, cron or CI | no | yes |
+| You invoke it by | asking in plain language | typing a command |
 
-That is the price of it being connected at all, before you ask anything. It is
-not unusual, and almost nobody publishes it.
+An MCP server sends its whole tool list to the model on **every turn**, whether
+you mention Google Photos or not. That is the price of being connected at all,
+before you ask anything. It is not unusual, and almost nobody publishes it.
 
-Two ways to spend less.
+The number above is measured, not estimated: a real `initialize` plus
+`tools/list` handshake against this build returns 31,707 bytes of tool
+definitions, which tokenises to 7,271, plus 352 tokens of server instructions.
 
-**Turn it off when you are not using it.** In Claude Code that is
+Over twenty turns where Google Photos comes up once, that is roughly 152,000
+tokens against 2,600. When the whole conversation is about your photos, the gap
+closes and the server is the better experience, because you ask in plain
+language instead of remembering flags.
+
+### Spending less
+
+**Turn the server off when you are not using it.** In Claude Code that is
 `@google-photos` to toggle, and every client has an equivalent.
+`GOOGLE_PHOTOS_READ_ONLY=1` drops it to the 15 reading tools, measured at 3,958
+tokens.
 
-**Or reach for a shell instead.** A command is not in the context window, so it
-costs nothing on the turns you do not use it. It is not free either: an agent
-still needs the skill file, roughly 1,300 tokens, but only once the subject
-comes up rather than on every turn regardless.
+**Or install the CLI and skip the server.** All 26 tools stay reachable, the
+standing cost falls to nothing, and an agent pays only when the subject comes
+up: 372 tokens for the command listing, or 2,612 for the whole `SKILL.md`.
 
 ## 7. Tools 🛠️
 
-29 tools. Read-only mode leaves 16.
+26 tools. Read-only mode leaves 15.
 
 ### Picking from your library
 
@@ -473,11 +521,8 @@ human has to actually use the URL before anything is visible.
 |---|---|
 | `create_album` | Create an empty album |
 | `list_albums` | List albums this server created |
-| `get_album` | One album, with cover and sharing state |
+| `get_album` | One album, with its cover and item count |
 | `update_album` | Rename, or set the cover photo |
-| `share_album` | Share by link, and return the URL |
-| `unshare_album` | Revoke the link |
-| `list_shared_albums` | Shared albums, with their links |
 | `add_to_album` | Add up to 50 items |
 | `remove_from_album` | Remove up to 50, keeping them in the library |
 | `add_album_enrichment` | Insert a caption, a place, or a map between photos |
@@ -522,11 +567,18 @@ Three prompts: **pick-and-work**, **build-album**, and **diagnose**.
 
 ## 8. Notes and gotchas 📓
 
-**Google removed whole-library read on 1 April 2025.** The `photoslibrary`,
-`photoslibrary.readonly` and `photoslibrary.sharing` scopes are gone for
-third-party apps, with no replacement outside Google's partner programme. Any
-tool offering to search your entire library is either on a grandfathered grant
-or searching only what it uploaded and calling that your library.
+**Google removed whole-library read on 31 March 2025**, and shipped the change
+on 1 April. The `photoslibrary`, `photoslibrary.readonly` and
+`photoslibrary.sharing` scopes are gone for third-party apps, with no
+replacement. Any tool offering to search your entire library is either on a
+grandfathered grant or searching only what it uploaded and calling that your
+library.
+
+**There is no sharing.** `albums.share`, `albums.unshare` and every
+`sharedAlbums` method were removed in the same change and now return
+`403 PERMISSION_DENIED` for every app. Google's own answer is that the user
+shares an album by hand in the Google Photos app, so this server ships no
+sharing tools rather than four that always fail.
 
 **So an empty listing means "this server uploaded nothing", not "you have no
 photos."** The tool descriptions say so, so a model does not report it wrongly.
@@ -552,18 +604,16 @@ requests and 75,000 media-byte requests. Fetching bytes spends the second, not
 the first. `get_media_items` fetches 50 in one request where `get_media_item`
 would spend 50.
 
-**Writes work by default.** Two things need `confirm: true`, and only two:
-uploading, because there is no delete, and `share_album`, because a link that
-has been sent cannot be recalled. Creating or renaming an album does not.
-Confirming everything trains a model to confirm without reading.
+**Writes work by default.** One thing needs `confirm: true`: uploading, because
+there is no delete. Creating or renaming an album does not. Confirming
+everything trains a model to confirm without reading.
 
 `GOOGLE_PHOTOS_READ_ONLY=1` removes every write from the tool list.
-`GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0` keeps ordinary writes and blocks uploading
-and sharing. `GOOGLE_PHOTOS_AUDIT_LOG=<path>` records every attempted write.
+`GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0` keeps ordinary writes and blocks uploading.
+`GOOGLE_PHOTOS_AUDIT_LOG=<path>` records every attempted write.
 
-**Album titles and descriptions are text other people wrote**, and a
-collaborative shared album can be written to by anyone with the link. Treat
-anything read back as data, never as instructions.
+**Album titles and descriptions are text**, and a filename or description can
+carry anything. Treat anything read back as data, never as instructions.
 
 ## 9. Troubleshooting 🔧
 
@@ -580,80 +630,6 @@ anything read back as data, never as instructions.
 | Nothing appears in Claude Desktop | Node is not on the PATH Desktop sees, or the JSON is malformed. Check `~/Library/Logs/Claude/mcp-server-google-photos.log` |
 
 ## 10. FAQ ❓
-
-**What is an MCP server?**
-
-Model Context Protocol is an open standard that lets an AI assistant use outside
-tools. An MCP server exposes a set of tools, and any MCP client (Claude Code,
-Claude Desktop, Cursor, Windsurf, VS Code, Codex CLI, Gemini CLI) can call them.
-This one exposes Google Photos.
-
-**Can it search all my photos?**
-
-No, and nothing can. Google removed that for third-party apps on 1 April 2025.
-It can show you a picker, and you choose what it sees.
-
-**Can it delete a photo?**
-
-No. Google exposes no delete endpoint to any app. That is also why uploading
-asks for confirmation.
-
-**Does it upload my photos anywhere?**
-
-No. It runs on your machine and talks directly to Google. There is no service in
-the middle. Photo bytes are held in memory for one call and never cached.
-
-**Is my refresh token safe?**
-
-It is scoped to four permissions and no more: read what you pick, upload, read
-back what it uploaded, edit what it created. It cannot read your existing photos
-and cannot reach any other Google service. It still reaches a real photo
-library, so treat it as a password. Revoke at
-[myaccount.google.com/permissions](https://myaccount.google.com/permissions).
-
-**Why do I have to create my own Google Cloud project?**
-
-Google Photos has no API keys and does not support service accounts. A user
-OAuth grant is the only way in, and a grant needs a client. Setup is once.
-
-**Why did it stop working after a week?**
-
-The OAuth consent screen is in Testing, where Google expires authorisations
-after seven days. Set it to In production.
-
-**Do I need Google to verify my app?**
-
-Not for your own use. You click past an "unverified app" warning. Verification
-matters only when other people will use your client, and Google Photos scopes
-need a separate review on top of the usual one.
-
-**Can I run it for more than one Google account?**
-
-One account per server instance. Run a second instance with a different refresh
-token under a different name in your client config.
-
-**Can I use it from claude.ai on the web?**
-
-Yes, but claude.ai runs connectors from Anthropic's cloud, so it needs the HTTP
-transport hosted somewhere with a public HTTPS URL. See
-[section 4](#4-connect-your-client-).
-
-**How do I stop an agent changing anything?**
-
-`GOOGLE_PHOTOS_READ_ONLY=1`. The write tools are not registered at all, so a
-model cannot call what it cannot see, and the list drops from 29 tools to 16.
-
-**How do I know it is actually working?**
-
-`doctor`. It tests credentials, scopes and a live API call, and names the first
-real problem rather than leaving you to guess.
-
-## 11. What changed 📦
-
-Every release, newest first, in [CHANGELOG.md](./CHANGELOG.md), with the upstream
-API and action versions this was last checked against.
-
-## FAQ ❓
 
 <details>
 <summary><b>What is an MCP server?</b></summary>
@@ -752,9 +728,111 @@ client's config.
 
 </details>
 
+<details>
+<summary><b>Is my refresh token safe?</b></summary>
+
+It is scoped to four permissions and no more: read what you pick, upload, read back what it uploaded, and edit what it created. It cannot read your existing photos and cannot reach any other Google service.
+
+It still reaches a real photo library, so treat it as a password. Revoke it at [myaccount.google.com/permissions](https://myaccount.google.com/permissions).
+
+</details>
+
+<details>
+<summary><b>Why do I have to create my own Google Cloud project?</b></summary>
+
+Google Photos has no API keys and does not support service accounts for these APIs. A user OAuth grant is the only way in, and a grant needs a client. It is about ten minutes, once, and it is free.
+
+</details>
+
+<details>
+<summary><b>Why did it stop working after a week?</b></summary>
+
+The OAuth consent screen is still in Testing, where Google expires authorisations after seven days and the refresh token with them. Set the publishing status to In production on the Audience page.
+
+</details>
+
+<details>
+<summary><b>Do I need Google to verify my app?</b></summary>
+
+Not for your own use. You click past an "unverified app" warning during sign-in. Verification matters only when other people will use your client, and Google Photos scopes need a separate review on top of the usual one.
+
+</details>
+
+<details>
+<summary><b>Can I connect more than one Google account?</b></summary>
+
+Yes. Set `GOOGLE_PHOTOS_ACCOUNTS` to a JSON array instead of the three single-account variables, run `auth` once per account, and pass `account: "brand"` on any tool. `list_accounts` shows what is connected. [Section 4](#4-connect-your-client-) has the config block.
+
+</details>
+
+<details>
+<summary><b>Can I use it from claude.ai on the web?</b></summary>
+
+Yes, but claude.ai runs connectors from Anthropic's cloud, so it needs the HTTP transport hosted somewhere with a public HTTPS URL. [Section 4](#4-connect-your-client-) covers it.
+
+</details>
+
+<details>
+<summary><b>How do I stop an agent changing anything?</b></summary>
+
+`GOOGLE_PHOTOS_READ_ONLY=1`. The write tools are not registered at all, so a model cannot call what it cannot see, and the list drops from 26 tools to 15.
+
+</details>
+
+<details>
+<summary><b>How do I know it is actually working?</b></summary>
+
+`doctor`. It tests credentials, scopes and a live API call, and names the first real problem rather than leaving you to guess.
+
+</details>
+
+## Environment variables
+
+Three are required. Everything else has a working default and exists so you can
+tighten or tune it.
+
+**Credentials**
+
+| Variable | What it is |
+|---|---|
+| `GOOGLE_PHOTOS_CLIENT_ID` | OAuth client id, from your own Google Cloud project. [Section 3](#3-setup-) creates one |
+| `GOOGLE_PHOTOS_CLIENT_SECRET` | The matching client secret |
+| `GOOGLE_PHOTOS_REFRESH_TOKEN` | From `google-photos-mcp auth` |
+| `GOOGLE_PHOTOS_ACCOUNTS` | A JSON array instead, for several Google accounts at once. Replaces the three above |
+| `GOOGLE_PHOTOS_DEFAULT_ACCOUNT` | Which account acts when a tool names none. Comma-separated, in order of preference. Defaults to the first configured |
+
+**Safety**
+
+| Variable | Default | What it does |
+|---|---|---|
+| `GOOGLE_PHOTOS_READ_ONLY` | `0` | `1` removes every write, leaving the 15 reading tools |
+| `GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE` | `1` | `0` keeps ordinary writes and blocks uploading |
+| `GOOGLE_PHOTOS_AUDIT_LOG` | none | Path to an append-only JSON-lines record of every attempted write |
+
+**Tuning**
+
+| Variable | Default | What it does |
+|---|---|---|
+| `GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS` | `30000` | Per-request deadline |
+| `GOOGLE_PHOTOS_MAX_RETRIES` | `2` | Retries on 429 and 5xx, for idempotent verbs only |
+| `GOOGLE_PHOTOS_AUTH_PORT` | `4180` | Loopback port `auth` listens on. Must match a registered redirect URI |
+
+**Serving over HTTP** (`--http`, read [SECURITY.md](SECURITY.md) before you use it)
+
+| Variable | Default | What it does |
+|---|---|---|
+| `GOOGLE_PHOTOS_HTTP_PORT` | `8787` | Port to bind |
+| `GOOGLE_PHOTOS_HTTP_HOST` | `127.0.0.1` | Interface to bind. Widen it only if you mean it |
+| `GOOGLE_PHOTOS_HTTP_TOKEN` | none | Bearer token the HTTP transport requires, when set |
+
+## Versions
+
+See [CHANGELOG.md](CHANGELOG.md), newest first, with the upstream API and action
+versions this was last checked against.
+
 ## Questions
 
-Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-photos-mcp/issues) and I will help.
+Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-photos-mcp-cli/issues) and I will help.
 
 ## About the author 👋
 
@@ -762,7 +840,7 @@ Navid Moazzez is a leading AI business strategist, and the host of the AI Creato
 
 **Links**
 
-- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp)
+- Personal website: [navid.me](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp-cli)
 - YouTube: [@thenavidm](https://youtube.com/@thenavidm?sub_confirmation=1) and [@thenavidai](https://youtube.com/@thenavidai?sub_confirmation=1)
 - X: [@thenavidm](https://x.com/thenavidm)
 - Instagram: [@thenavidm](https://instagram.com/thenavidm)
@@ -779,7 +857,7 @@ If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm)
 
 ## Security
 
-Found a vulnerability? [Report it privately](https://github.com/thenavidm/google-photos-mcp/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
+Found a vulnerability? [Report it privately](https://github.com/thenavidm/google-photos-mcp-cli/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
 
 ## License
 
@@ -789,4 +867,4 @@ Not affiliated with, endorsed by, or connected to Google LLC.
 
 ---
 
-© 2026 [NM Media](https://navid.media?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp). Made with ❤️ by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp).
+© 2026 [NM Media](https://navid.media?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp-cli). Made with ❤️ by [Navid Moazzez](https://navid.me?utm_source=github&utm_medium=readme&utm_campaign=google-photos-mcp-cli).

@@ -1,0 +1,63 @@
+{
+  "manifest_version": "0.2",
+  "name": "google-photos",
+  "display_name": "Google Photos",
+  "version": "1.2.0",
+  "description": "Google Photos MCP server for Claude Code and AI agents. 26 tools for the photo picker, uploads, albums, enrichments, descriptions and app-created media.",
+  "long_description": "Connects Claude to Google Photos through the Picker API and the Library API.\n\nGoogle removed whole-library read access from every third-party app on 31 March 2025, so the picker is the only route to a photo this server did not upload: it hands the user a Google-hosted URL, they choose, and Claude sees exactly what they chose. Everything else operates on media this server uploaded itself.\n\nSetup is an OAuth client in a Google Cloud project you own, which takes about ten minutes once. Run `google-photos-mcp auth` to turn the client id and secret into a refresh token, then paste all three below.\n\nAn upload cannot be undone: Google exposes no delete endpoint, so upload_from_url, upload_file, save_to_library and create_album_with_media refuse to run without an explicit confirmation.",
+  "author": { "name": "Navid Moazzez", "url": "https://navid.me" },
+  "repository": { "type": "git", "url": "https://github.com/thenavidm/google-photos-mcp-cli" },
+  "homepage": "https://github.com/thenavidm/google-photos-mcp-cli",
+  "documentation": "https://github.com/thenavidm/google-photos-mcp-cli#readme",
+  "support": "https://github.com/thenavidm/google-photos-mcp-cli/issues",
+  "license": "MIT",
+  "keywords": ["google-photos", "photos", "picker", "albums", "mcp"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "GOOGLE_PHOTOS_CLIENT_ID": "${user_config.client_id}",
+        "GOOGLE_PHOTOS_CLIENT_SECRET": "${user_config.client_secret}",
+        "GOOGLE_PHOTOS_REFRESH_TOKEN": "${user_config.refresh_token}",
+        "GOOGLE_PHOTOS_READ_ONLY": "${user_config.read_only}"
+      }
+    }
+  },
+  "user_config": {
+    "client_id": {
+      "type": "string",
+      "title": "OAuth client ID",
+      "description": "From the Web application OAuth client in your own Google Cloud project. Ends in .apps.googleusercontent.com.",
+      "required": true
+    },
+    "client_secret": {
+      "type": "string",
+      "title": "OAuth client secret",
+      "description": "The secret shown beside that client ID in the Google Cloud console.",
+      "sensitive": true,
+      "required": true
+    },
+    "refresh_token": {
+      "type": "string",
+      "title": "Refresh token",
+      "description": "Run `npx -y @thenavidm/google-photos-mcp-cli auth` with the two values above set, approve in the browser, and paste what it prints. Treat it like a password.",
+      "sensitive": true,
+      "required": true
+    },
+    "read_only": {
+      "type": "boolean",
+      "title": "Read only",
+      "description": "Hide every tool that can upload, create an album or write a description.",
+      "default": false,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "node": ">=20" }
+  }
+}

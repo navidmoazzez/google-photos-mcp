@@ -9,7 +9,7 @@
  */
 
 import { z } from "zod";
-import { defineTool, clamp, confirmArg, pageArgs, type AnyToolSpec , accountArg } from "./kit.js";
+import { defineTool, clamp, pageArgs, type AnyToolSpec, accountArg } from "./kit.js";
 import { page, shapeAlbum, type RawAlbum } from "../format/items.js";
 
 const APP_CREATED_NOTE =
@@ -57,7 +57,7 @@ export const albumTools: AnyToolSpec[] = [
   defineTool({
     name: "get_album",
     title: "Get one album",
-    description: `Fetch a single album by id, including its item count, cover photo and sharing state.\n\nA 404 here usually means the album exists but was not created by this app, rather than that the id is wrong. ${APP_CREATED_NOTE}`,
+    description: `Fetch a single album by id, including its item count and cover photo.\n\nA 404 here usually means the album exists but was not created by this app, rather than that the id is wrong. ${APP_CREATED_NOTE}`,
     schema: { album_id: z.string().describe("The album id, from list_albums or create_album."), ...accountArg },
     risk: "read",
     handler: async (args, ctx) => {
@@ -108,83 +108,6 @@ export const albumTools: AnyToolSpec[] = [
         { method: "PATCH", body, query: { updateMask: mask.join(",") } },
       );
       return shapeAlbum(album);
-    },
-  }),
-
-  defineTool({
-    name: "share_album",
-    title: "Share an album by link",
-    description:
-      "Turn an album into a shared album and return a link anyone can open without signing in.\n\nThis is the one thing here that reaches people outside the account, and a link that has been sent cannot be recalled. unshare_album revokes it, but not from anyone who already saved the contents. Requires confirm: true.",
-    schema: {
-      album_id: z.string().describe("The album to share."),
-      collaborative: z
-        .boolean()
-        .optional()
-        .describe("Let people who open the link add their own photos to the album. Default false."),
-      commentable: z.boolean().optional().describe("Let people comment on items. Default true."),
-      ...confirmArg,
-      ...accountArg,
-    },
-    risk: "destructive",
-    public: true,
-    summary: (args) => `share album ${args.album_id} by public link`,
-    handler: async (args, ctx) => {
-      const data = await ctx.client.request<{ shareInfo?: RawAlbum["shareInfo"] }>(
-        "library",
-        `/albums/${encodeURIComponent(args.album_id)}:share`,
-        {
-          method: "POST",
-          body: {
-            sharedAlbumOptions: {
-              isCollaborative: args.collaborative ?? false,
-              isCommentable: args.commentable ?? true,
-            },
-          },
-        },
-      );
-      return {
-        album_id: args.album_id,
-        share_url: data.shareInfo?.shareableUrl,
-        share_token: data.shareInfo?.shareToken,
-        collaborative: data.shareInfo?.sharedAlbumOptions?.isCollaborative,
-        commentable: data.shareInfo?.sharedAlbumOptions?.isCommentable,
-        note: "Anyone with this URL can view the album without signing in.",
-      };
-    },
-  }),
-
-  defineTool({
-    name: "unshare_album",
-    title: "Stop sharing an album",
-    description:
-      "Revoke an album's share link and make it private again. Anyone who already opened the link loses access, but anything they saved or downloaded stays with them.",
-    schema: { album_id: z.string().describe("The album to stop sharing."), ...accountArg },
-    risk: "write",
-    idempotent: true,
-    summary: (args) => `revoke sharing on album ${args.album_id}`,
-    handler: async (args, ctx) => {
-      await ctx.client.request("library", `/albums/${encodeURIComponent(args.album_id)}:unshare`, {
-        method: "POST",
-        body: {},
-      });
-      return { album_id: args.album_id, shared: false };
-    },
-  }),
-
-  defineTool({
-    name: "list_shared_albums",
-    title: "List shared albums",
-    description: `List the shared albums this app created, with their share links. ${APP_CREATED_NOTE}`,
-    schema: { ...pageArgs, ...accountArg },
-    risk: "read",
-    handler: async (args, ctx) => {
-      const data = await ctx.client.request<{ sharedAlbums?: RawAlbum[]; nextPageToken?: string }>(
-        "library",
-        "/sharedAlbums",
-        { query: { pageSize: clamp(args.limit, 25, 50), pageToken: args.page_token, excludeNonAppCreatedData: "true" } },
-      );
-      return page((data.sharedAlbums ?? []).map(shapeAlbum), data.nextPageToken, { note: APP_CREATED_NOTE });
     },
   }),
 

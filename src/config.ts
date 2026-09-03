@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+
 /**
  * Resolving credentials, and the multi-account model.
  *
@@ -57,6 +59,14 @@ export type Config = {
  * 2025-04-01, so requesting them now fails the consent screen outright rather
  * than degrading. Everything below still works for a project created today.
  */
+/**
+ * The running version, read from package.json rather than repeated here. A
+ * hardcoded copy drifts the moment a release bumps one and not the other, and
+ * a User-Agent that lies is the hardest kind of bug report to read.
+ */
+const require = createRequire(import.meta.url);
+const PACKAGE_VERSION: string = (require("../package.json") as { version: string }).version;
+
 export const SCOPES = [
   // Read what the user picked in Google's own picker UI. This is the only
   // route to media the app did not itself upload.
@@ -177,7 +187,7 @@ export function loadConfig(): Config {
     allowDestructive: envFlag("GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE", true),
     requestTimeoutMs: envInt("GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS", 30_000),
     maxRetries: envInt("GOOGLE_PHOTOS_MAX_RETRIES", 2),
-    userAgent: `google-photos-mcp/1.1.0 (+https://github.com/thenavidm/google-photos-mcp)`,
+    userAgent: `google-photos-mcp/${PACKAGE_VERSION} (+https://github.com/thenavidm/google-photos-mcp-cli)`,
     auditPath: process.env.GOOGLE_PHOTOS_AUDIT_LOG?.trim() || undefined,
     authPort: envInt("GOOGLE_PHOTOS_AUTH_PORT", DEFAULT_AUTH_PORT),
   };

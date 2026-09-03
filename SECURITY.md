@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-[Report it privately](https://github.com/thenavidm/google-photos-mcp/security/advisories/new).
+[Report it privately](https://github.com/thenavidm/google-photos-mcp-cli/security/advisories/new).
 Please do not open a public issue for a security problem: an issue is visible to
 everyone the moment you file it, including whoever would use the bug.
 
@@ -49,18 +49,15 @@ Two things require `confirm: true`:
 **Uploading.** Google exposes no delete endpoint for media items. An upload is
 permanent as far as any API is concerned, and has to be removed by hand.
 
-**Sharing an album.** It produces a URL anyone can open without signing in.
-Revoking it does not reach whoever already opened it.
-
 `GOOGLE_PHOTOS_READ_ONLY=1` removes every write from the tool list entirely, so
 a model cannot call one. `GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0` keeps ordinary
-writes and blocks uploading and sharing. `GOOGLE_PHOTOS_AUDIT_LOG` records every
+writes and blocks uploading. `GOOGLE_PHOTOS_AUDIT_LOG` records every
 attempted write, allowed and blocked alike.
 
 ## Prompt injection
 
 Album titles, filenames and photo descriptions are text people wrote, and a
-collaborative shared album can be written to by anyone holding the link.
+filename can carry anything.
 
 Anything read back from the API is data. The server's instructions tell the
 model this explicitly, but a client that auto-approves every tool call is

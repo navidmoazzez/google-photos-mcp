@@ -5,11 +5,11 @@ The one document for agents. `CLAUDE.md` points here.
 ## What this is
 
 An MCP server for Google Photos. TypeScript, ESM, Node 20+, stdio and
-streamable HTTP. Published as `@thenavidm/google-photos-mcp`.
+streamable HTTP. Published as `@thenavidm/google-photos-mcp-cli`.
 
 ## The constraint that shapes everything
 
-Google removed whole-library read access on 1 April 2025. The
+Google removed whole-library read access on 31 March 2025. The
 `photoslibrary`, `photoslibrary.readonly` and `photoslibrary.sharing` scopes no
 longer exist for third-party apps.
 
@@ -48,7 +48,7 @@ src/
 
 1. `defineTool` in the right module. Group by what it reaches, not by endpoint.
 2. Set `risk` honestly. `destructive` means it cannot be undone through the API,
-   which here means uploading and sharing, and nothing else.
+   which here means uploading, and nothing else.
 3. `destructive` tools must spread `...confirmArg` into their schema. A test
    enforces that the two always match.
 4. Write the description for a model that cannot see the code. Say what it

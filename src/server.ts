@@ -7,6 +7,7 @@
  * rather than something the user has to know to ask for.
  */
 
+import { createRequire } from "node:module";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ClientPool } from "./api/pool.js";
 import { loadConfig, isConfigured, type Config } from "./config.js";
@@ -14,7 +15,15 @@ import { WriteGuard } from "./safety.js";
 import { ALL_TOOLS } from "./tools/index.js";
 import { makeContext, register } from "./tools/kit.js";
 
-export const VERSION = "1.1.0";
+/**
+ * Read from package.json rather than repeated here.
+ *
+ * A hardcoded copy silently drifts: a release bumps package.json and leaves
+ * this behind, so `--version` and `doctor` answer for a build that is not the
+ * one running.
+ */
+const require = createRequire(import.meta.url);
+export const VERSION: string = (require("../package.json") as { version: string }).version;
 
 export const INSTRUCTIONS = `Tools for Google Photos: picking photos from the user's library, uploading, and organising albums.
 
@@ -26,7 +35,7 @@ Five things worth knowing before calling anything:
 
 3. Because of 2, an empty result from list_app_media or search_library means "this app has uploaded nothing", not "the user has no photos". Do not report it as an empty library. If the user wants you to work with an existing photo, start a picker session.
 
-4. Uploading cannot be undone. Google exposes no delete, so a mistaken upload has to be removed by hand in the Google Photos app. upload_from_url, upload_file, save_to_library, create_album_with_media and share_album all refuse to run without confirm: true. Pass it when the user has actually asked for that action, not to get past the refusal.
+4. Uploading cannot be undone. Google exposes no delete, so a mistaken upload has to be removed by hand in the Google Photos app. upload_from_url, upload_file, save_to_library and create_album_with_media all refuse to run without confirm: true. Pass it when the user has actually asked for that action, not to get past the refusal.
 
 5. A base_url is not a permanent link. It expires in about an hour and needs a size suffix. Use download_media_item or download_picked instead of handing one to the user.
 
@@ -103,13 +112,13 @@ uploaded itself.
 exactly those. Full library reach, user-mediated, per session. Selections are readable
 only while the session lives.
 
-**Library API, app-created data only.** Upload media, make albums, organise, describe,
-share. Every read is filtered to what this app created.
+**Library API, app-created data only.** Upload media, make albums, organise and
+describe. Every read is filtered to what this app created.
 
 ## Can
 - Let the user pick anything from their library, then read it
 - Upload photos and videos
-- Create, rename, share and unshare albums
+- Create and rename albums
 - Add and remove items from albums this app made
 - Add captions, locations and maps to albums
 - Set descriptions and album covers
@@ -123,7 +132,9 @@ share. Every read is filtered to what this app created.
 - **Delete a media item.** No endpoint exists. An upload is permanent as far as any API
   is concerned; the user removes it by hand
 - Mark a photo as a favourite, or archive one
-- Read or write anyone's shared album that this app did not create
+- **Share an album.** \`albums.share\`, \`albums.unshare\` and every \`sharedAlbums\`
+  method were removed on 2025-03-31 and now return 403. The user shares an album by hand
+  in the Google Photos app
 
 ## Practical consequences
 - An empty listing means "this app uploaded nothing", never "the user has no photos"

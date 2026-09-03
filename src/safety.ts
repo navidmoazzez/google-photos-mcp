@@ -3,22 +3,17 @@
  *
  * The hazard here is narrower than on a social network, and worth stating
  * precisely so the guard is not over-applied. Nothing this server does is
- * public by default: an upload lands in a private library, and an album is
- * private until it is explicitly shared.
+ * public: Google removed album sharing from the API on 2025-03-31, so an
+ * upload lands in a private library and stays there.
  *
- * Two operations genuinely escape:
- *
- *   share_album   mints a shareable link. Anyone holding that URL can view the
- *                 album without signing in, and a URL that has been sent
- *                 cannot be unsent. Unsharing revokes it, but not from anyone
- *                 who already opened it.
+ * One operation genuinely escapes:
  *
  *   upload_*      puts bytes in someone's real photo library, where they mix
  *                 into a lifetime of personal photos. There is no API to
  *                 delete them again; Google deliberately does not expose one.
  *                 A mistaken upload has to be cleaned up by hand in the app.
  *
- * Those two require `confirm: true`. Creating an album, renaming one, or
+ * That one requires `confirm: true`. Creating an album, renaming one, or
  * editing a description does not: each is reversible in one call and
  * confirming everything trains a model to pass confirm reflexively, which is
  * worse protection than none because it looks like a safeguard.
