@@ -6,12 +6,14 @@
  * `google-photos-mcp --http`      HTTP, for running it somewhere always on
  * `google-photos-mcp auth`        one-time sign-in, prints a refresh token
  * `google-photos-mcp doctor`      check the setup and say what is wrong
+ * `google-photos-cli`             the same tools as shell commands
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { buildServer, VERSION } from "./server.js";
 import { loadConfig, isConfigured, missingCredentials, cleanEnv } from "./config.js";
 import { httpOptionsFromEnv, startHttpServer } from "./transport/http.js";
+import { runCli, isCliCommand } from "./cli.js";
 
 const HELP = `google-photos-mcp ${VERSION}
 
@@ -20,16 +22,23 @@ const HELP = `google-photos-mcp ${VERSION}
   google-photos-mcp auth                Sign in once and print a refresh token.
   google-photos-mcp doctor              Check the setup and report what is wrong.
   google-photos-mcp --version           Print the version.
+  google-photos-cli                     The same tools as shell commands.
+  google-photos-cli <command> --help    What one command takes.
 
 Credentials, all three required:
   GOOGLE_PHOTOS_CLIENT_ID          OAuth client id from your Google Cloud project
   GOOGLE_PHOTOS_CLIENT_SECRET      the matching client secret
   GOOGLE_PHOTOS_REFRESH_TOKEN      from \`google-photos-mcp auth\`
 
+Or, for several Google accounts at once:
+  GOOGLE_PHOTOS_ACCOUNTS           JSON array, replaces the three above
+  GOOGLE_PHOTOS_DEFAULT_ACCOUNT    which one acts when a tool names none
+
 Options:
   GOOGLE_PHOTOS_READ_ONLY=1             hide every write from the tool list
   GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE=0     keep writes, block uploading and sharing
   GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS      per-request deadline, default 30000
+  GOOGLE_PHOTOS_MAX_RETRIES             retries on 429 and 5xx, default 2
   GOOGLE_PHOTOS_AUDIT_LOG               append-only log of every attempted write
   GOOGLE_PHOTOS_AUTH_PORT               loopback port for \`auth\`, default 4180
   GOOGLE_PHOTOS_HTTP_PORT / _HOST / _TOKEN  for --http
@@ -37,7 +46,7 @@ Options:
 Setting up the Google Cloud project takes about ten minutes and is the only
 fiddly part. The walkthrough is in the README, section 3.
 
-https://github.com/navidmoazzez/google-photos-mcp
+https://github.com/thenavidm/google-photos-mcp
 `;
 
 async function runAuth(): Promise<number> {
@@ -93,9 +102,45 @@ async function runAuth(): Promise<number> {
   }
 }
 
+/**
+ * One entry point, two programs. `google-photos-mcp` is the server and must stay
+ * silent on stdout; `google-photos-cli` is the one a person types. Running the CLI
+ * binary with no arguments is someone asking what they can type, so it lists
+ * the commands rather than hanging on a transport that will never speak.
+ */
+function invokedAsCli(): boolean {
+  const name = (process.argv[1] ?? "").split("/").pop() ?? "";
+  return name.startsWith("google-photos-cli");
+}
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const command = argv[0];
+
+  if (invokedAsCli() && argv.length === 0) {
+    process.exitCode = await runCli(["tools"]);
+    return;
+  }
+
+  // Checked before --help and --version so `<tool> --help` reaches the tool.
+  // A bare `--help` starts with a dash, so it falls through to the block below.
+  if (isCliCommand(argv)) {
+    process.exitCode = await runCli(argv);
+    return;
+  }
+
+  // An unknown word used to fall through and start the server, which then sat
+  // waiting on stdin: a typo looked like a hang, and scripts saw exit code 0.
+  // `auth`, `doctor` and `help` are not tools but are still real commands, and
+  // the OAuth setup is the first thing anyone runs, so they pass through.
+  const shared = new Set(["auth", "doctor", "help"]);
+  if (invokedAsCli() && command !== undefined && !command.startsWith("-") && !shared.has(command)) {
+    process.stderr.write(
+      `${JSON.stringify({ error: `Unknown command '${command}'. Run \`google-photos-cli\` to list them.` }, null, 2)}\n`,
+    );
+    process.exitCode = 1;
+    return;
+  }
 
   if (argv.includes("--help") || argv.includes("-h") || command === "help") {
     process.stdout.write(HELP);

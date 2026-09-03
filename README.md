@@ -2,10 +2,10 @@
 
 # Google Photos MCP
 
-[![Stars](https://img.shields.io/github/stars/navidmoazzez/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/navidmoazzez/google-photos-mcp)
+[![Stars](https://img.shields.io/github/stars/thenavidm/google-photos-mcp?style=flat&logo=github&label=Stars)](https://github.com/thenavidm/google-photos-mcp)
 [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
 [![npm](https://img.shields.io/npm/v/@thenavidm/google-photos-mcp?color=orange&label=npm)](https://www.npmjs.com/package/@thenavidm/google-photos-mcp)
-[![CI](https://img.shields.io/github/actions/workflow/status/navidmoazzez/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/navidmoazzez/google-photos-mcp/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/thenavidm/google-photos-mcp/ci.yml?branch=main&label=CI)](https://github.com/thenavidm/google-photos-mcp/actions)
 [![YouTube](https://img.shields.io/badge/YouTube-@thenavidm-red?logo=youtube&logoColor=white)](https://youtube.com/@thenavidm?sub_confirmation=1)
 [![X](https://img.shields.io/badge/X-@thenavidm-black?logo=x)](https://x.com/thenavidm)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-thenavidm-0A66C2?logo=linkedin&logoColor=white)](https://linkedin.com/in/thenavidm)
@@ -391,6 +391,28 @@ docker run -i --rm \
   google-photos-mcp
 ```
 
+### Every setting
+
+Everything is an environment variable, because a client config is already a
+JSON `env` block and flags would mean editing `args` separately.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `GOOGLE_PHOTOS_CLIENT_ID` | none | OAuth client id, from your own Google Cloud project |
+| `GOOGLE_PHOTOS_CLIENT_SECRET` | none | The matching client secret |
+| `GOOGLE_PHOTOS_REFRESH_TOKEN` | none | From `google-photos-mcp auth` |
+| `GOOGLE_PHOTOS_ACCOUNTS` | none | JSON array, for several Google accounts at once. Replaces the three above |
+| `GOOGLE_PHOTOS_DEFAULT_ACCOUNT` | first configured | Which account acts when a tool names none. Comma-separated, in order of preference |
+| `GOOGLE_PHOTOS_READ_ONLY` | `0` | `1` removes every write from the tool list |
+| `GOOGLE_PHOTOS_ALLOW_DESTRUCTIVE` | `1` | `0` keeps ordinary writes and blocks uploading and sharing |
+| `GOOGLE_PHOTOS_AUDIT_LOG` | off | Path to an append-only JSON-lines record of every attempted write |
+| `GOOGLE_PHOTOS_REQUEST_TIMEOUT_MS` | `30000` | Per-request deadline |
+| `GOOGLE_PHOTOS_MAX_RETRIES` | `2` | Retries on 429 and 5xx, for idempotent verbs only |
+| `GOOGLE_PHOTOS_AUTH_PORT` | `4180` | Loopback port `auth` listens on. Must match a registered redirect URI |
+| `GOOGLE_PHOTOS_HTTP_PORT` | `8787` | Port for `--http` |
+| `GOOGLE_PHOTOS_HTTP_HOST` | `127.0.0.1` | Interface for `--http`. Widen it only if you mean it |
+| `GOOGLE_PHOTOS_HTTP_TOKEN` | none | Bearer token `--http` requires, when set |
+
 ## 5. Check it worked 🩺
 
 ```bash
@@ -732,7 +754,7 @@ client's config.
 
 ## Questions
 
-Run into a problem or have a question? [Open an issue](https://github.com/navidmoazzez/google-photos-mcp/issues) and I will help.
+Run into a problem or have a question? [Open an issue](https://github.com/thenavidm/google-photos-mcp/issues) and I will help.
 
 ## About the author 👋
 
@@ -757,7 +779,7 @@ If this is useful, star the repo and come say hi on [X](https://x.com/thenavidm)
 
 ## Security
 
-Found a vulnerability? [Report it privately](https://github.com/navidmoazzez/google-photos-mcp/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
+Found a vulnerability? [Report it privately](https://github.com/thenavidm/google-photos-mcp/security/advisories/new), not as a public issue. [SECURITY.md](SECURITY.md) covers what this server holds, the write-safety model, and running it over HTTP.
 
 ## License
 

@@ -38,15 +38,25 @@ export type Risk =
   /** Reaches other people, or cannot be undone through this API. */
   | "destructive";
 
+/** Which surface a guard is protecting, so a refusal names the right syntax. */
+export type Surface = "mcp" | "cli";
+
 export class WriteGuard {
   private readonly config: Config;
+  private readonly surface: Surface;
 
-  constructor(config: Config) {
+  constructor(config: Config, surface: Surface = "mcp") {
     this.config = config;
+    this.surface = surface;
   }
 
   get readOnly(): boolean {
     return this.config.readOnly;
+  }
+
+  /** A model reads `confirm: true`; a person at a terminal reads `--confirm`. */
+  private get confirmFlag(): string {
+    return this.surface === "cli" ? "--confirm" : "confirm: true";
   }
 
   check(tool: string, risk: Risk, confirm: boolean | undefined, summary: string): void {
@@ -69,7 +79,7 @@ export class WriteGuard {
       if (confirm !== true) {
         this.audit(tool, summary, "blocked: no confirm");
         throw new WriteBlockedError(
-          `${tool} cannot be undone through the API, so it will not run without confirm: true. About to: ${summary}. Call again with confirm: true if that is what was asked for.`,
+          `${tool} cannot be undone through the API, so it will not run without ${this.confirmFlag}. About to: ${summary}. Call again with ${this.confirmFlag} if that is what was asked for.`,
         );
       }
     }
