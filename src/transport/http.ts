@@ -23,8 +23,25 @@ export type HttpOptions = {
 };
 
 export function httpOptionsFromEnv(argv: string[] = []): HttpOptions {
-  const flag = argv.find((a) => a.startsWith("--port="));
-  const port = Number(flag?.split("=")[1] ?? process.env.GOOGLE_PHOTOS_HTTP_PORT ?? 8787);
+  // Both spellings, and neither silently. `--port=8790` and `--port 8790` are
+  // what people type; accepting only the first meant the second fell through to
+  // the default with no complaint, which is indistinguishable from the flag
+  // being ignored. A trailing `--port` with nothing after it, `--portable`, and
+  // a non-positive number all fall back rather than producing NaN.
+  const i = argv.findIndex((a) => a === "--port" || a.startsWith("--port="));
+  const raw =
+    i === -1
+      ? undefined
+      : (argv[i] as string).includes("=")
+        ? (argv[i] as string).split("=").slice(1).join("=")
+        : argv[i + 1];
+  const fromFlag = raw === undefined ? NaN : Number(raw);
+  const fromEnv = Number(process.env.GOOGLE_PHOTOS_HTTP_PORT);
+  const port = Number.isFinite(fromFlag) && fromFlag > 0
+    ? fromFlag
+    : Number.isFinite(fromEnv) && fromEnv > 0
+      ? fromEnv
+      : 8787;
   return {
     port: Number.isFinite(port) && port > 0 ? port : 8787,
     host: process.env.GOOGLE_PHOTOS_HTTP_HOST || "127.0.0.1",
